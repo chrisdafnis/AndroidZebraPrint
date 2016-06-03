@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "@+string/AppName", MainLauncher = true, Icon = "@drawable/icon")]
+    [Activity(Label = "@+string/AppName", MainLauncher = true, Icon = "@drawable/dakota_healthcare_icon")]
     public class MainActivity : Activity
     {
         IZebraPrinter zebraPrinter;
@@ -82,7 +82,7 @@ namespace AndroidZebraPrint
 
         private bool AntiPiracyCheck()
         {
-            IList<string> validDeviceSerialNumbers = new string[] { "FHP5CM00227", "FHP5CM00269", "FHP5CM00232", "FHP5CM00144", "FHP5CM00013", "FHP4AM00107" };
+            IList<string> validDeviceSerialNumbers = new string[] { "FHP5CM00227", "FHP5CM00269", "FHP5CM00232", "FHP5CM00144", "FHP5CM00013", "FHP4AM00107", "FHP52M00438" };
             bool isValid = false;
 
             if (validDeviceSerialNumbers.Contains(Build.Serial))
@@ -149,6 +149,10 @@ namespace AndroidZebraPrint
                 case Resource.Id.About:
                     var aboutPage = new Android.Content.Intent(this, typeof(AboutButtonActivity));
                     StartActivityForResult(aboutPage, 4);
+                    return true;
+                case Resource.Id.SearchLocation:
+                    var searchLocationPage = new Android.Content.Intent(this, typeof(FindLocationActivity));
+                    StartActivityForResult(searchLocationPage, 6);
                     return true;
                 case Resource.Id.Quit:
                     AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -233,6 +237,41 @@ namespace AndroidZebraPrint
             {
                 if (resultCode == Result.Ok)
                 {
+                }
+                if (resultCode == Result.Canceled)
+                {
+                    //Write your code if there's no result
+                }
+            }
+            else if (requestCode == 6)   // result from Location Search
+            {
+                if (resultCode == Result.Ok)
+                {
+                    string searchLocation = data.GetStringExtra("location");
+                    CustomArrayAdapter adapter = (CustomArrayAdapter)locationsView.Adapter;
+                    int i = 0;
+                    object item = null;
+                    foreach (IGLNLocation location in locationList)
+                    {
+                        if (location.Code == searchLocation)
+                        {
+                            item = adapter.GetItem(i);
+                            adapter.SetSelectedIndex(i);
+                            locationsView.SmoothScrollToPosition(i);
+                            break;
+                        }
+                        i++;
+                    }
+                    if (item == null)
+                    {
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                        dialogBuilder.SetTitle("Code Not Found");
+                        dialogBuilder.SetMessage("The room code '" + searchLocation + "' does not exist in the current database");
+                        dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
+                        dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate { });
+                        dialogBuilder.Show();
+                    }
                 }
                 if (resultCode == Result.Canceled)
                 {

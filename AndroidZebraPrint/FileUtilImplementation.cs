@@ -8,6 +8,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.Net;
 
 namespace AndroidZebraPrint
 {
@@ -19,12 +20,13 @@ namespace AndroidZebraPrint
 
         public void SaveXMLSettings(object printer)
         {
-            string localFilename = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "config.xml");
-            IZebraPrinter discoveredPrinter = (IZebraPrinter)printer;
-
-            XDocument xDoc = XDocument.Parse("<AppConfig><SavedPrinterConfig><FriendlyName></FriendlyName><MACAddress>AC:3F:A4:13:38:CF</MACAddress></SavedPrinterConfig></AppConfig>");
             try
             {
+                string localFilename = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "config.xml");
+                IZebraPrinter discoveredPrinter = (IZebraPrinter)printer;
+
+                XDocument xDoc = XDocument.Parse("<AppConfig><SavedPrinterConfig><FriendlyName></FriendlyName><MACAddress></MACAddress></SavedPrinterConfig></AppConfig>");
+
                 XElement xRoot = xDoc.Root;
                 foreach (XElement xElem in xRoot.Elements())
                 {
@@ -47,9 +49,16 @@ namespace AndroidZebraPrint
 
         public object LoadXMLSettings()
         {
-            string localFilename = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "config.xml");
             try
             {
+                string localFilename = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "config.xml");
+                if (!File.Exists(localFilename))
+                {
+                    LogFile("First run", "First run", MethodBase.GetCurrentMethod().Name, 0, GetType().Name);
+                    IZebraPrinter dummyprinter = new ZebraPrinter("", "");
+                    SaveXMLSettings(dummyprinter);
+                }
+
                 XDocument xDoc = XDocument.Load(localFilename);
                 XElement xRoot = xDoc.Root;
                 string friendlyName = "";
@@ -214,6 +223,43 @@ namespace AndroidZebraPrint
 
             // Close the stream:
             log.Close();
+        }
+
+        //Read A File From Server
+        public void ReadFileFromFTP(String FTP, String Local)
+        {
+            //Create A 2MB Cache Buffer
+            byte[] Buffer = new byte[2048];
+            int FileLenght = 0;
+
+            //Create An FTP Client Request
+            FtpWebRequest Request = (FtpWebRequest)WebRequest.Create(FTP);
+            Request.Method = WebRequestMethods.Ftp.DownloadFile;
+
+            //Use A Login Credential
+            Request.Credentials = new NetworkCredential("USER", "PASS");
+
+            //Receive An Answer From Server
+            FtpWebResponse Response = (FtpWebResponse)Request.GetResponse();
+            Stream ResponseStream = Response.GetResponseStream();
+
+            //Write The File To The SDCARD
+            StreamWriter Output = new StreamWriter(Local, false);
+
+            //Store On Buffer And Write TO SDCARD
+            while ((FileLenght = ResponseStream.Read(Buffer, 0, Buffer.Length)) > 0)
+            {
+                for (int i = 0; i < FileLenght; i++)
+                {
+                    Output.Write((char)Buffer[i]);
+                }
+            }
+
+            //Close File Stream Writer
+            Output.Close();
+
+            //Close Connection Request
+            Response.Close();
         }
     }
 }

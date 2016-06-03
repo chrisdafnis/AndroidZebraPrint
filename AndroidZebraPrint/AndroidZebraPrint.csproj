@@ -93,6 +93,7 @@
     <Compile Include="ExpandedZebraPrinter.cs" />
     <Compile Include="FileUtilImplementation.cs" />
     <Compile Include="FindFilesActivity.cs" />
+    <Compile Include="FindLocationActivity.cs" />
     <Compile Include="FindPrintersActivity.cs" />
     <Compile Include="GLNLocation.cs" />
     <Compile Include="IExpandedZebraPrinter.cs" />
@@ -136,6 +137,9 @@
     <AndroidResource Include="Resources\layout\LocationInfo.axml">
       <SubType>AndroidResource</SubType>
     </AndroidResource>
+    <AndroidResource Include="Resources\layout\FindLocation.axml">
+      <SubType>AndroidResource</SubType>
+    </AndroidResource>
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\Main.axml" />
@@ -163,6 +167,12 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values\colors.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\dakota_healthcare_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\dakota_healthcare_logo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Forms.1.4.4.6392\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets" Condition="Exists('..\packages\Xamarin.Forms.1.4.4.6392\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets')" />

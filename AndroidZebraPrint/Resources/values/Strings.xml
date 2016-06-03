@@ -12,6 +12,7 @@
     <string name="NoPrinter">No Printer Selected</string>
     <string name="FindFiles">Select Data Files...</string>
     <string name="RowInfo">Location Information</string>
+    <string name="SearchLocation">Search For Room Code</string>
     <string name="AboutBox">About</string>
     <string name="Version">1.01.1001</string>
     <string name="AboutBoxText">Copyright © Dakota Integrated Solutions Ltd</string>

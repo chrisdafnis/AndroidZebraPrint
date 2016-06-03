@@ -6,6 +6,8 @@
       android:title="@string/LoadDataFile" />
   <item android:id="@+id/RowInfo"
         android:title="@string/RowInfo" />
+  <item android:id="@+id/SearchLocation"
+      android:title="@string/SearchLocation" />
   <item android:id="@+id/About"
         android:title="@string/About" />
   <item android:id="@+id/Quit"

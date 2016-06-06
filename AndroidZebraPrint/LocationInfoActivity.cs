@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "@+string/RowInfo", Theme = "@android:style/Theme.Dialog")]
+    [Activity(Label = "@+string/RowInfo", Theme = "@style/dialog_light")]
     public class LocationInfoActivity : Activity
     {
         TextView locationInfo;

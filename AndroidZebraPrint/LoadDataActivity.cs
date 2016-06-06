@@ -8,7 +8,7 @@ using System.Xml.Linq;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "@+string/LoadLocations", Theme = "@android:style/Theme.Dialog")]
+    [Activity(Label = "@+string/LoadLocations", Theme = "@style/dialog_light")]
     class LoadDataActivity : Activity
     {
         const int fields = 8;

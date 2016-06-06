@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "FindLocationActivity", Theme = "@android:style/Theme.Dialog")]
+    [Activity(Label = "@+string/SearchLocation", Theme = "@style/dialog_light")]
     public class FindLocationActivity : Activity
     {
         EditText searchLocationText;

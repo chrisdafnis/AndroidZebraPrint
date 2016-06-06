@@ -4,6 +4,7 @@ using Android.Content;
 using Android.Graphics;
 using Android.Views;
 using Android.Widget;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -23,6 +24,7 @@ namespace AndroidZebraPrint
         private int layoutResourceId;
         private int selectedIndex;
         private Dictionary<int, bool> printedItems;
+        private int[] colors = new int[] { Color.LightBlue, Color.White };
 
         public CustomArrayAdapter(Context context, int layout, System.Collections.IList objects) : base(context, layout, objects)
         {
@@ -78,9 +80,14 @@ namespace AndroidZebraPrint
 
             holder = new ViewHolder();
             var inflater = Application.Context.GetSystemService(Context.LayoutInflaterService) as LayoutInflater;
+            
+            int colorPos = position % colors.Length;
+            Color color = new Color(colors[colorPos]);
+            convertView.SetBackgroundColor(color);
+
             TextView text = convertView.FindViewById<TextView>(Resource.Id.ListItemRowText);
             text.Text = objectList[position].ToString();
-            holder.Text = convertView.FindViewById<TextView>(Resource.Id.ListItemRowText);
+            holder.Text = text;
             holder.Selected = false;
             holder.Printed = false;
             holder.Location = (IGLNLocation)objectList[position];
@@ -112,18 +119,49 @@ namespace AndroidZebraPrint
             rowView.SetBackgroundColor(Color.Transparent);
             TextView textView = (TextView)rowView.FindViewById(Resource.Id.ListItemRowText);
             if (textView != null)
-                textView.SetTextColor(Color.White);
+                textView.SetTextColor(Color.Black);
         }
 
         private void HighlightPrintedRow(View rowView, int position)
         {
             if (printedItems.ContainsKey(position))
             {
-                rowView.SetBackgroundColor(Color.DarkBlue);
+                rowView.SetBackgroundColor(Color.ParseColor("#0A64A2"));
                 TextView textView = (TextView)rowView.FindViewById(Resource.Id.ListItemRowText);
                 if (textView != null)
-                    textView.SetTextColor(Color.Gray);
+                    textView.SetTextColor(Color.White);
             }
+        }
+    }
+
+    class AlternateRowAdapter : ArrayAdapter
+    {
+        private int[] colors = new int[] { Color.LightBlue, Color.White};
+        private IList objectList;
+
+        public AlternateRowAdapter(Context context, int layout, System.Collections.IList objects) : base(context, layout, objects)
+        {
+            objectList = objects;
+        }
+
+        public override View GetView(int position, View convertView, ViewGroup parent)
+        {
+            ViewHolder holder = null;
+            convertView = ((LayoutInflater)Context.GetSystemService(Context.LayoutInflaterService)).Inflate(Resource.Layout.ListRow, null);
+            holder = new ViewHolder();
+            var inflater = Application.Context.GetSystemService(Context.LayoutInflaterService) as LayoutInflater;
+
+            int colorPos = position % colors.Length;
+            Color color = new Color(colors[colorPos]);
+            convertView.SetBackgroundColor(color);
+
+            TextView textView = convertView.FindViewById<TextView>(Resource.Id.ListItemRowText);
+            textView.Text = objectList[position].ToString();
+
+            if (textView != null)
+                textView.SetTextColor(Color.Black);
+
+            return convertView;
         }
     }
 }

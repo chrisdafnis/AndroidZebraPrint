@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "@+string/AppName", MainLauncher = true, Icon = "@drawable/dakota_healthcare_icon")]
+    [Activity(Label = "@+string/AppName", MainLauncher = true, Icon = "@drawable/dakota_healthcare_icon", Theme = "@android:style/Theme.Holo.Light")]
     public class MainActivity : Activity
     {
         IZebraPrinter zebraPrinter;
@@ -154,10 +154,10 @@ namespace AndroidZebraPrint
                     var aboutPage = new Android.Content.Intent(this, typeof(AboutButtonActivity));
                     StartActivityForResult(aboutPage, 4);
                     return true;
-                //case Resource.Id.SearchLocation:
-                //    var searchLocationPage = new Android.Content.Intent(this, typeof(FindLocationActivity));
-                //    StartActivityForResult(searchLocationPage, 6);
-                //    return true;
+                case Resource.Id.SearchLocation:
+                    var searchLocationPage = new Android.Content.Intent(this, typeof(FindLocationActivity));
+                    StartActivityForResult(searchLocationPage, 6);
+                    return true;
                 case Resource.Id.Quit:
                     AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
@@ -255,19 +255,19 @@ namespace AndroidZebraPrint
                     string searchLocation = data.GetStringExtra("location");
                     CustomArrayAdapter adapter = (CustomArrayAdapter)locationsView.Adapter;
                     int i = 0;
-                    object item = null;
+                    bool found = false;
                     foreach (IGLNLocation location in locationList)
                     {
                         if (location.Code == searchLocation)
                         {
-                            item = adapter.GetItem(i);
+                            found = true;
                             adapter.SetSelectedIndex(i);
                             locationsView.SmoothScrollToPosition(i);
                             break;
                         }
                         i++;
                     }
-                    if (item == null)
+                    if (!found)
                     {
                         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 

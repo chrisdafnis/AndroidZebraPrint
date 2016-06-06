@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "@+string/SearchPrinters", Theme = "@android:style/Theme.Dialog")]
+    [Activity(Label = "@+string/SearchPrinters", Theme = "@style/dialog_light")]
     class FindPrintersActivity : Activity
     {
         ListView printerListView;
@@ -106,7 +106,7 @@ namespace AndroidZebraPrint
             }
             try
             {
-                printerListView.Adapter = new ArrayAdapter(Android.App.Application.Context, Android.Resource.Layout.SimpleListItem1, printers);
+                printerListView.Adapter = new AlternateRowAdapter(Android.App.Application.Context, Android.Resource.Layout.SimpleListItem1, printers);
             }
             catch (Exception ex)
             {

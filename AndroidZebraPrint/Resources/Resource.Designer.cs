@@ -109,8 +109,8 @@ namespace AndroidZebraPrint
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f090014
-			public const int About = 2131296276;
+			// aapt resource value: 0x7f090015
+			public const int About = 2131296277;
 			
 			// aapt resource value: 0x7f090011
 			public const int FindPrinters = 2131296273;
@@ -130,11 +130,14 @@ namespace AndroidZebraPrint
 			// aapt resource value: 0x7f09000f
 			public const int PrintQuantity = 2131296271;
 			
-			// aapt resource value: 0x7f090015
-			public const int Quit = 2131296277;
+			// aapt resource value: 0x7f090016
+			public const int Quit = 2131296278;
 			
 			// aapt resource value: 0x7f090013
 			public const int RowInfo = 2131296275;
+			
+			// aapt resource value: 0x7f090014
+			public const int SearchLocation = 2131296276;
 			
 			// aapt resource value: 0x7f090001
 			public const int aboutAppname = 2131296257;
@@ -328,6 +331,9 @@ namespace AndroidZebraPrint
 		
 		public partial class Style
 		{
+			
+			// aapt resource value: 0x7f070001
+			public const int app_light = 2131165185;
 			
 			// aapt resource value: 0x7f070000
 			public const int dialog_light = 2131165184;

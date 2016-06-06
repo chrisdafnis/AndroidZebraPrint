@@ -10,5 +10,6 @@
         android:minHeight="25px"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textColor="#A9A9A9"
         android:id="@+id/fileListView" />
 </LinearLayout>

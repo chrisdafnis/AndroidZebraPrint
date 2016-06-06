@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "@+string/FindFiles", Theme = "@android:style/Theme.Dialog")]
+    [Activity(Label = "@+string/FindFiles", Theme = "@style/dialog_light")]
     public class FindFilesActivity : Activity
     {
         ListView fileListView;
@@ -43,7 +43,7 @@ namespace AndroidZebraPrint
                     }
                     try
                     {
-                        fileListView.Adapter = new ArrayAdapter(Android.App.Application.Context, Android.Resource.Layout.SimpleListItem1, files);
+                        fileListView.Adapter = new AlternateRowAdapter(Android.App.Application.Context, Android.Resource.Layout.SimpleListItem1, files);
                     }
                     catch (Exception ex1)
                     {

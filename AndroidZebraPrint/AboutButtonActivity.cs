@@ -5,7 +5,7 @@ using Android.Widget;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "@+string/AboutBox", Theme = "@android:style/Theme.Dialog")]
+    [Activity(Label = "@+string/AboutBox", Theme = "@style/dialog_light")]
     public class AboutButtonActivity : Activity
     {
         protected override void OnCreate(Bundle savedInstanceState)

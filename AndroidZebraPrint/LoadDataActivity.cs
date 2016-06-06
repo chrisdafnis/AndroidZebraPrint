@@ -33,7 +33,7 @@ namespace AndroidZebraPrint
 
         private void LoadGLNLocations()
         {
-            xDoc = (XDocument)fileUtility.LoadXMLGLNFile(@"GLNStoImport.csv");
+            xDoc = (XDocument)fileUtility.LoadGLNFile(@"GLNStoImport.csv");
             XName xName = XName.Get("GLNLocation");
 
             foreach (XElement xElem in xDoc.Descendants("GLNLocation"))

@@ -127,6 +127,8 @@ namespace AndroidZebraPrint
                 case Resource.Id.RowInfo:
                     var rowInfoPage = new Android.Content.Intent(this, typeof(LocationInfoActivity));
                     IGLNLocation location = locationList[currentSelected];
+                    string printed = "";
+                    if (location.Printed) { printed = "Yes"; } else { printed = "No"; }
                     String info = String.Format("  Region: {0}\n\r" +
                                                 " Site: {1}\n\r" + 
                                                 " Building: {2}\n\r" + 
@@ -134,7 +136,8 @@ namespace AndroidZebraPrint
                                                 " Room: {4}\n\r" + 
                                                 " Code: {5}\n\r" + 
                                                 " GLN: {6}\n\r" + 
-                                                " Date: {7}",
+                                                " Date: {7}\n\r" +
+                                                " Printed: {8}",
                         location.Region,
                         location.Site,
                         location.Building,
@@ -142,7 +145,8 @@ namespace AndroidZebraPrint
                         location.Room,
                         location.Code,
                         location.GLN,
-                        location.Date.ToString());
+                        location.Date.ToString(),
+                        printed);
                     rowInfoPage.PutExtra("location", info);
                     StartActivityForResult(rowInfoPage, 5);
                     return true;
@@ -150,10 +154,10 @@ namespace AndroidZebraPrint
                     var aboutPage = new Android.Content.Intent(this, typeof(AboutButtonActivity));
                     StartActivityForResult(aboutPage, 4);
                     return true;
-                case Resource.Id.SearchLocation:
-                    var searchLocationPage = new Android.Content.Intent(this, typeof(FindLocationActivity));
-                    StartActivityForResult(searchLocationPage, 6);
-                    return true;
+                //case Resource.Id.SearchLocation:
+                //    var searchLocationPage = new Android.Content.Intent(this, typeof(FindLocationActivity));
+                //    StartActivityForResult(searchLocationPage, 6);
+                //    return true;
                 case Resource.Id.Quit:
                     AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
@@ -209,6 +213,7 @@ namespace AndroidZebraPrint
                         currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
                         View selected = locationsView.GetChildAt(currentSelected);
                         ((CustomArrayAdapter)locationsView.Adapter).SetPrintedIndex(currentSelected);
+                        fileUtility.SaveLocation(locationsFile, locationList[currentSelected]);
                     }
                     catch (Exception ex)
                     {
@@ -221,7 +226,7 @@ namespace AndroidZebraPrint
                     //Write your code if there's no result
                 }
             }
-            else if (requestCode == 3)   // result from PrintQuantity
+            else if (requestCode == 3)   // result from Load Locations file
             {
                 if (resultCode == Result.Ok)
                 {
@@ -282,7 +287,7 @@ namespace AndroidZebraPrint
 
         private void LoadLocations(string filename)
         {
-            XDocument xDoc = (XDocument)fileUtility.LoadXMLGLNFile(filename);
+            XDocument xDoc = (XDocument)fileUtility.LoadGLNFile(filename);
             if (xDoc != null)
             {
                 locationList = new ObservableCollection<IGLNLocation>();
@@ -299,6 +304,7 @@ namespace AndroidZebraPrint
                     location.Code = xElem.Element("Code").Value;
                     location.GLN = xElem.Element("GLN").Value;
                     location.Date = Convert.ToDateTime(xElem.Element("GLNCreationDate").Value);
+                    location.Printed = Convert.ToBoolean(xElem.Element("Printed").Value);
 
                     if (!locationList.Contains(location))
                     {
@@ -306,14 +312,17 @@ namespace AndroidZebraPrint
                     }
                 }
                 IGLNLocation[] locations = new IGLNLocation[locationList.Count];
-
-                for (int i = 0; i < locationList.Count; i++)
-                {
-                    locations[i] = locationList[i];
-                }
                 try
                 {
                     locationsView.Adapter = new CustomArrayAdapter(Android.App.Application.Context, Android.Resource.Layout.SimpleListItem1, locations);
+
+                    for (int i = 0; i < locationList.Count; i++)
+                    {
+                        locations[i] = locationList[i];
+                        if (locations[i].Printed)
+                            ((CustomArrayAdapter)locationsView.Adapter).SetPrintedIndex(i);
+                    }
+
                     locationsView.ItemClick += (object sender, ItemClickEventArgs e) =>
                         {
                             ((CustomArrayAdapter)((ListView)sender).Adapter).SetSelectedIndex(e.Position);
@@ -335,6 +344,10 @@ namespace AndroidZebraPrint
                 dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate { });
                 dialogBuilder.Show();
             }
+        }
+
+        private void SaveLocations(string filename)
+        {
         }
 
         private void LoadXMLSettings()

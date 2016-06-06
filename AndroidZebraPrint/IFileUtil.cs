@@ -6,8 +6,9 @@ namespace AndroidZebraPrint
     {
         void SaveXMLSettings(object printer);
         object LoadXMLSettings();
-        object LoadXMLGLNFile(string filename);
+        object LoadGLNFile(string filename);
         IEnumerable<string> GetFileList();
         void LogFile(string sExceptionName, string sEventName, string sControlName, int nErrorLineNo, string sFormName);
+        void SaveLocation(string filename, IGLNLocation iGLNLocation);
     }
 }

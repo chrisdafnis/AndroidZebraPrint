@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Net;
+using System.Text;
 
 namespace AndroidZebraPrint
 {
@@ -92,7 +93,7 @@ namespace AndroidZebraPrint
             }
         }
 
-        private XDocument TransformCSVToXml(string filename)
+        private XDocument TransformCSVToXML(string filename)
         {
             XDocument xDoc = null;
             try
@@ -104,9 +105,26 @@ namespace AndroidZebraPrint
                 var header = new Regex("GLN Creation Date");
                 csv = csv.Where(x => !header.IsMatch(x)).ToArray();
 
+                StringBuilder builder = new StringBuilder();
+                for (int i=0;i<csv.Count<string>();i++)
+                {
+                    string row = csv[i];
+                    if (!row.EndsWith("True", StringComparison.CurrentCultureIgnoreCase) &&
+                        !row.EndsWith("False", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        csv[i] = row + ",False\r\n";
+                    }
+                    builder.AppendLine(csv[i]);
+                }
+                
+                StreamWriter writer = new StreamWriter(filename);
+                writer.Write(builder);
+                writer.Close();
+
                 XElement location = new XElement("Root",
                     from str in csv
                     let fields = str.Split(',')
+
                     select new XElement("GLNLocation",
                         new XElement("Region", fields[0]),
                         new XElement("Site", fields[1]),
@@ -115,7 +133,8 @@ namespace AndroidZebraPrint
                         new XElement("Room", fields[4]),
                         new XElement("Code", fields[5]),
                         new XElement("GLN", fields[6]),
-                        new XElement("GLNCreationDate", fields[7])));
+                        new XElement("GLNCreationDate", fields[7]),
+                        new XElement("Printed", fields[8])));
 
             XmlSchemaSet schemaSet = AddXMLSchema();
             xDoc = XDocument.Parse(location.ToString());
@@ -137,18 +156,76 @@ namespace AndroidZebraPrint
             return xDoc;
         }
 
+        private string TransformXMLToCSV(XDocument document)
+        {
+            return "";
+        }
+
         public IEnumerable<string> GetFileList()
         {
             return Directory.EnumerateFiles(Directorypath, FILE_EXTENSION, SearchOption.TopDirectoryOnly);
         }
 
-        public object LoadXMLGLNFile(string filename)
+        public object LoadGLNFile(string filename)
         {
             try
             {
                 if (File.Exists(filename))
                 {
-                    XDocument xDoc = TransformCSVToXml(filename);
+                    XDocument xDoc = TransformCSVToXML(filename);
+                    return xDoc;
+                }
+            }
+            catch (IndexOutOfRangeException oorex)
+            {
+                //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                LogFile(oorex.Message, oorex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(oorex), GetType().Name);
+            }
+            catch (Exception ex)
+            {
+                //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+            }
+            return null;
+        }
+
+        public void SaveLocation(string filename, IGLNLocation iGLNLocation)
+        {
+            StreamReader reader = new StreamReader(filename);
+            string content = reader.ReadToEnd();
+            reader.Close();
+            char[] splitParams = new char[] { '\r', '\n' };
+            string[] rows = content.Split(splitParams, StringSplitOptions.RemoveEmptyEntries);
+
+            String newRow = String.Empty;
+            String oldRow = String.Empty;
+            foreach (String row in rows)
+            {
+                if (row.Contains(iGLNLocation.GLN))
+                {
+                    oldRow = row;
+                    newRow = Regex.Replace(row, "False", "True");
+                    break;
+                }
+            }
+
+            if (newRow != String.Empty && oldRow != String.Empty)
+            {
+                content = Regex.Replace(content, oldRow, newRow);
+            }
+            
+            StreamWriter writer = new StreamWriter(filename);
+            writer.Write(content);
+            writer.Close();
+        }
+
+        public object SaveGLNFile(string filename)
+        {
+            try
+            {
+                if (File.Exists(filename))
+                {
+                    XDocument xDoc = TransformCSVToXML(filename);
                     return xDoc;
                 }
             }

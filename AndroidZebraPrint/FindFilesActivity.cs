@@ -31,36 +31,44 @@ namespace AndroidZebraPrint
 
         private void SearchForFiles()
         {
-            fileList = fileUtility.GetFileList();
-            if (fileList.Count<string>() > 0)
+            try
             {
-                string[] files = new string[fileList.Count<string>()];
-                for (int i = 0; i < fileList.Count<string>(); i++)
+                fileList = fileUtility.GetFileList();
+                if (fileList.Count<string>() > 0)
                 {
-                    files[i] = fileList.ElementAt<string>(i);
+                    string[] files = new string[fileList.Count<string>()];
+                    for (int i = 0; i < fileList.Count<string>(); i++)
+                    {
+                        files[i] = fileList.ElementAt<string>(i);
+                    }
+                    try
+                    {
+                        fileListView.Adapter = new ArrayAdapter(Android.App.Application.Context, Android.Resource.Layout.SimpleListItem1, files);
+                    }
+                    catch (Exception ex1)
+                    {
+                        //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                        fileUtility.LogFile(ex1.Message, ex1.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex1), Class.SimpleName);
+                    }
                 }
-                try
+                else
                 {
-                    fileListView.Adapter = new ArrayAdapter(Android.App.Application.Context, Android.Resource.Layout.SimpleListItem1, files);
-                }
-                catch (Exception ex)
-                {
-                    //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                    fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                    dialogBuilder.SetTitle("File Not Found");
+                    dialogBuilder.SetMessage("No GLN Locations files found on SD card. Application will now exit.");
+                    dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
+                    dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate
+                    {
+                        this.Finish();
+                    });
+                    dialogBuilder.Show();
                 }
             }
-            else
+            catch (Exception ex2)
             {
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-                dialogBuilder.SetTitle("File Not Found");
-                dialogBuilder.SetMessage("No GLN Locations files found on SD card. Application will now exit.");
-                dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
-                dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate
-                {
-                    this.Finish();
-                });
-                dialogBuilder.Show();
+                //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                fileUtility.LogFile(ex2.Message, ex2.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex2), Class.SimpleName);
             }
         }
 

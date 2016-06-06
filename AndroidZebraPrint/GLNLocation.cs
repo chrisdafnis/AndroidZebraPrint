@@ -15,5 +15,6 @@ namespace AndroidZebraPrint
         public override string ToString() { //return String.Format("{0},{1},{2},{3},{4},{5},{6},{7}", Region, Site, Building, Floor, Room, Code, GLN, Date.ToString()); }
             return String.Format("{0},{1}", Code, GLN);
         }
+        public bool Printed { get; set; }
     }
 }

@@ -109,74 +109,71 @@ namespace AndroidZebraPrint
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f080015
-			public const int About = 2131230741;
+			// aapt resource value: 0x7f090014
+			public const int About = 2131296276;
 			
-			// aapt resource value: 0x7f080011
-			public const int FindPrinters = 2131230737;
+			// aapt resource value: 0x7f090011
+			public const int FindPrinters = 2131296273;
 			
-			// aapt resource value: 0x7f080009
-			public const int ListItemRowText = 2131230729;
+			// aapt resource value: 0x7f090009
+			public const int ListItemRowText = 2131296265;
 			
-			// aapt resource value: 0x7f080012
-			public const int LoadDataFile = 2131230738;
+			// aapt resource value: 0x7f090012
+			public const int LoadDataFile = 2131296274;
 			
-			// aapt resource value: 0x7f080010
-			public const int LoadFile = 2131230736;
+			// aapt resource value: 0x7f090010
+			public const int LoadFile = 2131296272;
 			
-			// aapt resource value: 0x7f08000b
-			public const int PrintButton = 2131230731;
+			// aapt resource value: 0x7f09000b
+			public const int PrintButton = 2131296267;
 			
-			// aapt resource value: 0x7f08000f
-			public const int PrintQuantity = 2131230735;
+			// aapt resource value: 0x7f09000f
+			public const int PrintQuantity = 2131296271;
 			
-			// aapt resource value: 0x7f080016
-			public const int Quit = 2131230742;
+			// aapt resource value: 0x7f090015
+			public const int Quit = 2131296277;
 			
-			// aapt resource value: 0x7f080013
-			public const int RowInfo = 2131230739;
+			// aapt resource value: 0x7f090013
+			public const int RowInfo = 2131296275;
 			
-			// aapt resource value: 0x7f080014
-			public const int SearchLocation = 2131230740;
+			// aapt resource value: 0x7f090001
+			public const int aboutAppname = 2131296257;
 			
-			// aapt resource value: 0x7f080001
-			public const int aboutAppname = 2131230721;
+			// aapt resource value: 0x7f090000
+			public const int aboutLogo = 2131296256;
 			
-			// aapt resource value: 0x7f080000
-			public const int aboutLogo = 2131230720;
+			// aapt resource value: 0x7f090003
+			public const int aboutText = 2131296259;
 			
-			// aapt resource value: 0x7f080003
-			public const int aboutText = 2131230723;
+			// aapt resource value: 0x7f090002
+			public const int aboutVersion = 2131296258;
 			
-			// aapt resource value: 0x7f080002
-			public const int aboutVersion = 2131230722;
+			// aapt resource value: 0x7f090004
+			public const int buttonOK = 2131296260;
 			
-			// aapt resource value: 0x7f080004
-			public const int buttonOK = 2131230724;
+			// aapt resource value: 0x7f090007
+			public const int buttonSearch = 2131296263;
 			
-			// aapt resource value: 0x7f080007
-			public const int buttonSearch = 2131230727;
+			// aapt resource value: 0x7f090006
+			public const int editTextSearch = 2131296262;
 			
-			// aapt resource value: 0x7f080006
-			public const int editTextSearch = 2131230726;
+			// aapt resource value: 0x7f090005
+			public const int fileListView = 2131296261;
 			
-			// aapt resource value: 0x7f080005
-			public const int fileListView = 2131230725;
+			// aapt resource value: 0x7f09000a
+			public const int locationInfoText = 2131296266;
 			
-			// aapt resource value: 0x7f08000a
-			public const int locationInfoText = 2131230730;
+			// aapt resource value: 0x7f09000d
+			public const int locationsView = 2131296269;
 			
-			// aapt resource value: 0x7f08000d
-			public const int locationsView = 2131230733;
+			// aapt resource value: 0x7f090008
+			public const int printerListView = 2131296264;
 			
-			// aapt resource value: 0x7f080008
-			public const int printerListView = 2131230728;
+			// aapt resource value: 0x7f09000c
+			public const int selectedPrinterTxt = 2131296268;
 			
-			// aapt resource value: 0x7f08000c
-			public const int selectedPrinterTxt = 2131230732;
-			
-			// aapt resource value: 0x7f08000e
-			public const int spinnerQty = 2131230734;
+			// aapt resource value: 0x7f09000e
+			public const int spinnerQty = 2131296270;
 			
 			static Id()
 			{
@@ -231,11 +228,11 @@ namespace AndroidZebraPrint
 		public partial class Menu
 		{
 			
-			// aapt resource value: 0x7f070000
-			public const int dialog = 2131165184;
+			// aapt resource value: 0x7f080000
+			public const int dialog = 2131230720;
 			
-			// aapt resource value: 0x7f070001
-			public const int popup_menu = 2131165185;
+			// aapt resource value: 0x7f080001
+			public const int popup_menu = 2131230721;
 			
 			static Menu()
 			{
@@ -325,6 +322,22 @@ namespace AndroidZebraPrint
 			}
 			
 			private String()
+			{
+			}
+		}
+		
+		public partial class Style
+		{
+			
+			// aapt resource value: 0x7f070000
+			public const int dialog_light = 2131165184;
+			
+			static Style()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
+			
+			private Style()
 			{
 			}
 		}

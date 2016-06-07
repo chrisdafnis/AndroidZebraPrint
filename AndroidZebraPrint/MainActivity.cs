@@ -235,7 +235,16 @@ namespace AndroidZebraPrint
                 }
                 if (resultCode == Result.Canceled)
                 {
-                    //Write your code if there's no result
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                    dialogBuilder.SetTitle("File Not Found");
+                    dialogBuilder.SetMessage("No GLN Locations files found on SD card. Application will now exit.");
+                    dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
+                    dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate
+                    {
+                        this.Finish();
+                    });
+                    dialogBuilder.Show();
                 }
             }
             else if (requestCode == 5)   // result from LocationInfo

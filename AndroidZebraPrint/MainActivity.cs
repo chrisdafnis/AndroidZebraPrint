@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "@+string/AppName", MainLauncher = true, Icon = "@drawable/dakota_healthcare_icon", Theme = "@android:style/Theme.Holo.Light")]
+    [Activity(Label = "@+string/AppName", MainLauncher = true, Icon = "@drawable/dakota_healthcare_icon", Theme = "@android:style/Theme.Holo.Light", ConfigurationChanges = (Android.Content.PM.ConfigChanges.Orientation | Android.Content.PM.ConfigChanges.ScreenSize))]
     public class MainActivity : Activity
     {
         IZebraPrinter zebraPrinter;
@@ -127,8 +127,6 @@ namespace AndroidZebraPrint
                 case Resource.Id.RowInfo:
                     var rowInfoPage = new Android.Content.Intent(this, typeof(LocationInfoActivity));
                     IGLNLocation location = locationList[currentSelected];
-                    string printed = "";
-                    if (location.Printed) { printed = "Yes"; } else { printed = "No"; }
                     String info = String.Format("  Region: {0}\n\r" +
                                                 " Site: {1}\n\r" + 
                                                 " Building: {2}\n\r" + 
@@ -136,8 +134,7 @@ namespace AndroidZebraPrint
                                                 " Room: {4}\n\r" + 
                                                 " Code: {5}\n\r" + 
                                                 " GLN: {6}\n\r" + 
-                                                " Date: {7}\n\r" +
-                                                " Printed: {8}",
+                                                " Date: {7}",
                         location.Region,
                         location.Site,
                         location.Building,
@@ -145,8 +142,7 @@ namespace AndroidZebraPrint
                         location.Room,
                         location.Code,
                         location.GLN,
-                        location.Date.ToString(),
-                        printed);
+                        location.Date.ToString());
                     rowInfoPage.PutExtra("location", info);
                     StartActivityForResult(rowInfoPage, 5);
                     return true;
@@ -335,6 +331,7 @@ namespace AndroidZebraPrint
                     locationsView.ItemClick += (object sender, ItemClickEventArgs e) =>
                         {
                             ((CustomArrayAdapter)((ListView)sender).Adapter).SetSelectedIndex(e.Position);
+                            currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
                         };
                 }
                 catch (Exception ex)

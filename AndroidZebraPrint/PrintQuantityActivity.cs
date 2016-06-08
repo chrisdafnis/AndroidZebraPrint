@@ -6,7 +6,7 @@ using Android.Widget;
 
 namespace AndroidZebraPrint
 {
-    [Activity(Label = "@+string/PrintQuantity", Theme = "@android:style/Theme.Dialog")]
+    [Activity(Label = "@+string/PrintQuantity", Theme = "@style/dialog_light")]
     class PrintQuantityActivity : Activity
     {
         Spinner spinQty;

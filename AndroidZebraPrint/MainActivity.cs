@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using System.Collections.Generic;
 using static Android.Widget.AdapterView;
 using System.Reflection;
+using Zebra.Sdk.Comm;
 
 namespace AndroidZebraPrint
 {
@@ -386,8 +387,8 @@ namespace AndroidZebraPrint
             bool success = false;
             try
             {
-                //IConnection connection = ConnectionBuilder.Current.Build("BT:" + zebraPrinter.MACAddress);
-                Zebra.Sdk.Comm.BluetoothConnectionInsecure connection = new Zebra.Sdk.Comm.BluetoothConnectionInsecure(zebraPrinter.MACAddress);
+                IConnection connection = ConnectionBuilder.Build("BT:" + zebraPrinter.MACAddress);
+                //Zebra.Sdk.Comm.BluetoothConnectionInsecure connection = new Zebra.Sdk.Comm.BluetoothConnectionInsecure(zebraPrinter.MACAddress);
                 // Open the connection - physical connection is established here.
                 connection.Open();
                 //thePrinterConn.Open();
@@ -398,7 +399,6 @@ namespace AndroidZebraPrint
                 // Send the data to printer as a byte array.
                 //connection.Write(GetBytes(zplData));
                 byte[] response = connection.SendAndWaitForResponse(GetBytes(zplData), 3000, 1000, "\"");
-
                 //thePrinterConn.Close();
                 connection.Close();
                 success = true;

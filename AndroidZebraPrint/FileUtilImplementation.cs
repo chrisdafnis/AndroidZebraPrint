@@ -204,7 +204,7 @@ namespace AndroidZebraPrint
                 if (row.Contains(iGLNLocation.GLN))
                 {
                     oldRow = row;
-                    newRow = Regex.Replace(row, "False", "True");
+                    newRow = Regex.Replace(row, "False", "True", RegexOptions.IgnoreCase);
                     break;
                 }
             }

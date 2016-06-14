@@ -7,6 +7,7 @@ using Android.Widget;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace AndroidZebraPrint
 {
@@ -54,8 +55,21 @@ namespace AndroidZebraPrint
 
         public void SetPrintedIndex(int index)
         {
-            printedItems.Add(index, true);
-            NotifyDataSetChanged();
+            try
+            {
+                if (printedItems.ContainsKey(index))
+                {
+                    printedItems.Remove(index);
+                }
+                printedItems.Add(index, true);
+                NotifyDataSetChanged();
+            }
+            catch (Exception ex)
+            {
+                IFileUtil fileUtility = new FileUtilImplementation();
+                //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
+            }
         }
 
         public override int GetItemViewType(int position)

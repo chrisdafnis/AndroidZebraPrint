@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using static Android.Widget.AdapterView;
 using System.Reflection;
 using Zebra.Sdk.Comm;
+//using Com.Mitac.Cell.Device;
 
 namespace AndroidZebraPrint
 {
@@ -25,6 +26,7 @@ namespace AndroidZebraPrint
         int printQuantity = 1;
         string locationsFile;
         int currentSelected = 0;
+        //McSocketIo socketIO;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -79,6 +81,8 @@ namespace AndroidZebraPrint
                 var findFilesPage = new Android.Content.Intent(this, typeof(FindFilesActivity));
                 StartActivityForResult(findFilesPage, 3);
             }
+
+            //socketIO = new McSocketIo();
         }
 
         private bool AntiPiracyCheck()
@@ -268,6 +272,7 @@ namespace AndroidZebraPrint
                         {
                             found = true;
                             adapter.SetSelectedIndex(i);
+                            currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
                             locationsView.SmoothScrollToPosition(i);
                             break;
                         }

@@ -109,6 +109,19 @@ namespace AndroidZebraPrint
                 for (int i=0;i<csv.Count<string>();i++)
                 {
                     string row = csv[i];
+
+                    // remove unnecessary spaces from the end of the string
+                    while (row.EndsWith(" "))
+                    {
+                        row = row.Remove(row.LastIndexOf(' '), 1);
+                    }
+
+                    // remove unnecessary commas from the end of the string
+                    while (row.EndsWith(","))
+                    {
+                        row = row.Remove(row.LastIndexOf(','), 1);
+                    }
+
                     if (!row.EndsWith("True", StringComparison.CurrentCultureIgnoreCase) &&
                         !row.EndsWith("False", StringComparison.CurrentCultureIgnoreCase))
                     {

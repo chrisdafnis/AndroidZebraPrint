@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using static Android.Widget.AdapterView;
 using System.Reflection;
 using Zebra.Sdk.Comm;
+
 //using Com.Mitac.Cell.Device;
 
 namespace AndroidZebraPrint
@@ -81,7 +82,7 @@ namespace AndroidZebraPrint
                 var findFilesPage = new Android.Content.Intent(this, typeof(FindFilesActivity));
                 StartActivityForResult(findFilesPage, 3);
             }
-
+            //LoadJar();
             //socketIO = new McSocketIo();
         }
 

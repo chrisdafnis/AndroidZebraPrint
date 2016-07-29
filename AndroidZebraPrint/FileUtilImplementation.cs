@@ -18,6 +18,7 @@ namespace AndroidZebraPrint
         protected DiscoveredPrinterBluetooth savedPrinter = null;
         const string FILE_EXTENSION = "*.csv";
         public DiscoveredPrinterBluetooth SavedPrinter { get { return savedPrinter; } set { savedPrinter = value; } }
+        public enum CSVFileFormat { PLYMOUTH=0, CORNWALL, NORTHTEES, UNKNOWN };
 
         public void SaveXMLSettings(object printer)
         {
@@ -98,6 +99,7 @@ namespace AndroidZebraPrint
             XDocument xDoc = null;
             try
             {
+                CSVFileFormat fileType = CSVFileFormat.UNKNOWN;
                 string[] csv = File.ReadAllLines(filename);
                 // extract blank rows (if any)
                 csv = csv.Where(x => !string.IsNullOrEmpty(x)).ToArray();
@@ -105,61 +107,105 @@ namespace AndroidZebraPrint
                 var header = new Regex("GLN Creation Date");
                 csv = csv.Where(x => !header.IsMatch(x)).ToArray();
 
-                StringBuilder builder = new StringBuilder();
-                for (int i=0;i<csv.Count<string>();i++)
+                if (csv[0].Contains("Plymouth Hospitals NHS Trust"))
                 {
-                    string row = csv[i];
+                    fileType = CSVFileFormat.PLYMOUTH;
+                }
+                else if (csv[0].Contains("ROYAL CORNWALL HOSPITALS NHS TRUST"))
+                {
+                    fileType = CSVFileFormat.CORNWALL;
+                }
+                else if (csv[0].Contains("Plymouth Hospitals NHS Trust"))
+                {
+                    fileType = CSVFileFormat.NORTHTEES;
+                }
+                else
+                {
+                    fileType = CSVFileFormat.UNKNOWN;
+                }
+
+                StringBuilder builder = new StringBuilder();
+                foreach (string row in csv)
+                {
+                    //string temp = row.Replace("\",\"", "\" \"");
+                    //temp = temp.Replace("\"", "");
+                    string[] fields = Regex.Split(row, ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                    /*Regex CSVParser = new Regex(@",(?=[^""]*""(?:[^""]*""[^""]*"")*[^""]*$)");
+                    String[] fields = CSVParser.Split(temp);*/
+                    string temp = String.Empty;
+
+                    // clean up the fields (remove " and leading spaces)
+                    for (int i = 0; i < fields.Length; i++)
+                    {
+                        fields[i] = fields[i].TrimStart(' ', '"');
+                        fields[i] = fields[i].TrimEnd('"');
+                        if (fields[i].Contains(","))
+                            fields[i] = fields[i].Replace(","," ");
+                        temp += fields[i] + ",";
+                    }
+
+                    //temp = String.Join(",", fields);
 
                     // remove unnecessary spaces from the end of the string
-                    while (row.EndsWith(" "))
+                    while (temp.EndsWith(" "))
                     {
-                        row = row.Remove(row.LastIndexOf(' '), 1);
+                        temp = temp.Remove(temp.LastIndexOf(' '), 1);
                     }
 
                     // remove unnecessary commas from the end of the string
-                    while (row.EndsWith(","))
+                    while (temp.EndsWith(","))
                     {
-                        row = row.Remove(row.LastIndexOf(','), 1);
+                        temp = temp.Remove(temp.LastIndexOf(','), 1);
                     }
 
-                    if (!row.EndsWith("True", StringComparison.CurrentCultureIgnoreCase) &&
-                        !row.EndsWith("False", StringComparison.CurrentCultureIgnoreCase))
+                    // add the printed true/false flag to each now
+                    if (!temp.EndsWith("True", StringComparison.CurrentCultureIgnoreCase) &&
+                        !temp.EndsWith("False", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        csv[i] = row + ",False\r\n";
+                        temp = temp + ",False\r\n";
                     }
-                    builder.AppendLine(csv[i]);
+                    builder.AppendLine(temp);
                 }
                 
                 StreamWriter writer = new StreamWriter(filename);
                 writer.Write(builder);
                 writer.Close();
 
-                XElement location = new XElement("Root",
-                    from str in csv
-                    let fields = str.Split(',')
+                switch (fileType)
+                {
+                    case CSVFileFormat.PLYMOUTH:
+                    case CSVFileFormat.CORNWALL:
+                        {
 
-                    select new XElement("GLNLocation",
-                        new XElement("Region", fields[0]),
-                        new XElement("Site", fields[1]),
-                        new XElement("Building", fields[2]),
-                        new XElement("Floor", fields[3]),
-                        new XElement("Room", fields[4]),
-                        new XElement("Code", fields[5]),
-                        new XElement("GLN", fields[6]),
-                        new XElement("GLNCreationDate", fields[7]),
-                        new XElement("Printed", fields[8])));
+                            XElement location = new XElement("Root",
+                                from str in builder.ToString().Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                                let fields = str.Split(',')
 
-            XmlSchemaSet schemaSet = AddXMLSchema();
-            xDoc = XDocument.Parse(location.ToString());
-            if (xDoc == null | xDoc.Root == null)
-            {
-                throw new ApplicationException("xml error: the referenced stream is not xml.");
-            }
+                                select new XElement("GLNLocation",
+                                    new XElement("Region", fields[0]),
+                                    new XElement("Site", fields[1]),
+                                    new XElement("Building", fields[2]),
+                                    new XElement("Floor", fields[3]),
+                                    new XElement("Room", fields[4]),
+                                    new XElement("Code", fields[5]),
+                                    new XElement("GLN", fields[6]),
+                                    new XElement("GLNCreationDate", fields[7]),
+                                    new XElement("Printed", fields[8])));
 
-            xDoc.Validate(schemaSet, (o, e) =>
-            {
-                throw new ApplicationException("xsd validation error: xml file has structural problems");
-            });
+                            XmlSchemaSet schemaSet = AddXMLSchema();
+                            xDoc = XDocument.Parse(location.ToString());
+                            if (xDoc == null | xDoc.Root == null)
+                            {
+                                throw new ApplicationException("xml error: the referenced stream is not xml.");
+                            }
+
+                            xDoc.Validate(schemaSet, (o, e) =>
+                            {
+                                throw new ApplicationException("xsd validation error: xml file has structural problems");
+                            });
+                        }
+                        break;
+                }
             }
             catch (IndexOutOfRangeException ex)
             {

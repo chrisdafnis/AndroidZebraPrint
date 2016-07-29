@@ -36,6 +36,9 @@ namespace AndroidZebraPrint
 			// aapt resource value: 0x7f060000
 			public const int quantity_array = 2131099648;
 			
+			// aapt resource value: 0x7f060001
+			public const int valid_devices = 2131099649;
+			
 			static Array()
 			{
 				global::Android.Runtime.ResourceIdManager.UpdateIdValues();

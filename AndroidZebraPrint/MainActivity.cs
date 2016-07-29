@@ -88,7 +88,8 @@ namespace AndroidZebraPrint
 
         private bool AntiPiracyCheck()
         {
-            IList<string> validDeviceSerialNumbers = new string[] { "FHP5CM00227", "FHP5CM00269", "FHP5CM00232", "FHP5CM00144", "FHP5CM00013", "FHP4AM00107", "FHP52M00438" };
+            IList<string> validDeviceSerialNumbers = Resources.GetStringArray(Resource.Array.valid_devices);
+                //new string[] { "FHP5CM00227", "FHP5CM00269", "FHP5CM00232", "FHP5CM00144", "FHP5CM00013", "FHP4AM00107", "FHP52M00438", "FHP52M00075", "FHP52M00242" };
             bool isValid = false;
 
             if (validDeviceSerialNumbers.Contains(Build.Serial))

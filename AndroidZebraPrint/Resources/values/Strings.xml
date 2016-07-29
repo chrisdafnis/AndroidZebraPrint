@@ -21,7 +21,7 @@
     <string name="PrintQuantity">Select Print Quantity</string>
     <string name="QuitApplication">Exit Application</string>
     <string name="QuitPrompt">Are you sure you want to exit the application?</string>
-  <string name="Quantity_prompt">Choose a quantity</string>
+    <string name="Quantity_prompt">Choose a quantity</string>
     <string-array name="quantity_array">
       <item>1</item>
       <item>2</item>
@@ -32,6 +32,17 @@
       <item>7</item>
       <item>8</item>
       <item>9</item>      
+    </string-array>
+    <string-array name="valid_devices">
+      <item>FHP5CM00227</item>
+      <item>FHP5CM00269</item>
+      <item>FHP5CM00232"</item>
+      <item>FHP5CM00144</item>
+      <item>FHP5CM00013</item>
+      <item>FHP4AM00107</item>
+      <item>FHP52M00438</item>
+      <item>FHP52M00075</item>
+      <item>FHP52M00242</item>
     </string-array>
   <string name="Hello">Hello</string>
 </resources>

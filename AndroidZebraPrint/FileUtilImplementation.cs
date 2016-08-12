@@ -10,13 +10,17 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Net;
 using System.Text;
+using Excel;
+using System.Data;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml;
 
 namespace AndroidZebraPrint
 {
     public class FileUtilImplementation : IFileUtil
     {
         protected DiscoveredPrinterBluetooth savedPrinter = null;
-        const string FILE_EXTENSION = "*.csv";
+        public enum FILE_EXTENSIONS { csv = 0, xlsx };
         public DiscoveredPrinterBluetooth SavedPrinter { get { return savedPrinter; } set { savedPrinter = value; } }
         public enum CSVFileFormat { PLYMOUTH=0, CORNWALL, NORTHTEES, UNKNOWN };
 
@@ -115,7 +119,7 @@ namespace AndroidZebraPrint
                 {
                     fileType = CSVFileFormat.CORNWALL;
                 }
-                else if (csv[0].Contains("Plymouth Hospitals NHS Trust"))
+                else if (csv[0].Contains("Nth Tees & Hartlepool NHSTrust"))
                 {
                     fileType = CSVFileFormat.NORTHTEES;
                 }
@@ -127,11 +131,7 @@ namespace AndroidZebraPrint
                 StringBuilder builder = new StringBuilder();
                 foreach (string row in csv)
                 {
-                    //string temp = row.Replace("\",\"", "\" \"");
-                    //temp = temp.Replace("\"", "");
                     string[] fields = Regex.Split(row, ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                    /*Regex CSVParser = new Regex(@",(?=[^""]*""(?:[^""]*""[^""]*"")*[^""]*$)");
-                    String[] fields = CSVParser.Split(temp);*/
                     string temp = String.Empty;
 
                     // clean up the fields (remove " and leading spaces)
@@ -143,8 +143,6 @@ namespace AndroidZebraPrint
                             fields[i] = fields[i].Replace(","," ");
                         temp += fields[i] + ",";
                     }
-
-                    //temp = String.Join(",", fields);
 
                     // remove unnecessary spaces from the end of the string
                     while (temp.EndsWith(" "))
@@ -205,6 +203,182 @@ namespace AndroidZebraPrint
                             });
                         }
                         break;
+                    case CSVFileFormat.NORTHTEES:
+                        {
+                            XElement location = new XElement("Root",
+                                from str in builder.ToString().Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                                let fields = str.Split(',')
+
+                                // Region, Site, Building, Floor, Room, Code, GLN
+                                select new XElement("GLNLocation",
+                                    new XElement("Region", fields[0]),
+                                    new XElement("Site", fields[1]),
+                                    new XElement("Building", fields[2]),
+                                    new XElement("Floor", fields[3]),
+                                    new XElement("Room", fields[4]),
+                                    new XElement("Code", fields[5]),
+                                    new XElement("GLN", fields[6]),
+                                    new XElement("GLNCreationDate", DateTime.Now),
+                                    new XElement("Printed", fields[7])));
+
+                            XmlSchemaSet schemaSet = AddXMLSchema();
+                            xDoc = XDocument.Parse(location.ToString());
+                            if (xDoc == null | xDoc.Root == null)
+                            {
+                                throw new ApplicationException("xml error: the referenced stream is not xml.");
+                            }
+
+                            xDoc.Validate(schemaSet, (o, e) =>
+                            {
+                                throw new ApplicationException("xsd validation error: xml file has structural problems");
+                            });
+                        }
+                        break;
+                }
+            }
+            catch (IndexOutOfRangeException ex)
+            {
+                //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+            }
+            return xDoc;
+        }
+
+        private XDocument TransformXLSToXML(string filename)
+        {
+            XDocument xDoc = null;
+            try
+            {
+                FileStream stream = File.Open(filename, FileMode.Open, FileAccess.ReadWrite);
+                IExcelDataReader excelReader;
+
+                excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+                //excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
+                stream.Close();
+
+                excelReader.IsFirstRowAsColumnNames = true;
+                DataSet dataset = excelReader.AsDataSet();
+                StringBuilder builder = new StringBuilder();
+
+                List<object> tableCollection = new List<object>();
+                foreach (DataTable dt in dataset.Tables)
+                {
+                    tableCollection.Add(dt);
+                }
+
+                DataTable table = dataset.Tables[0];
+                bool hasPrintCol = true;
+                if (table.Columns.Count == 13)
+                {
+                    table.Columns.Add("Printed", typeof(string), "False");
+                    hasPrintCol = false;
+                }
+
+                foreach (DataRow row in dataset.Tables[0].Rows)
+                {
+                    string temp = String.Empty;
+
+                    if (row.ItemArray[1].ToString() != "Region")
+                    {
+                        GLNLocation glnlocation = new GLNLocation();
+                        glnlocation.Region = row.ItemArray[1].ToString();
+                        glnlocation.Site = row.ItemArray[3].ToString();
+                        glnlocation.Building = row.ItemArray[5].ToString();
+                        glnlocation.Floor = row.ItemArray[7].ToString();
+                        glnlocation.Room = row.ItemArray[9].ToString();
+                        glnlocation.Code = row.ItemArray[10].ToString();
+                        glnlocation.GLN = row.ItemArray[11].ToString();
+                        glnlocation.Date = Convert.ToDateTime(row.ItemArray[12]);
+                        if (hasPrintCol)
+                            glnlocation.Printed = Convert.ToBoolean(row.ItemArray[13]);
+
+                        // clean up site for commas etc
+                        glnlocation.Site = glnlocation.Site.TrimStart(' ', '"');
+                        glnlocation.Site = glnlocation.Site.TrimEnd('"');
+                        glnlocation.Site = glnlocation.Site.Replace(",", " ");
+
+                        temp = glnlocation.Value();
+
+                        // remove unnecessary spaces from the end of the string
+                        while (temp.EndsWith(" "))
+                        {
+                            temp = temp.Remove(temp.LastIndexOf(' '), 1);
+                        }
+
+                        // remove unnecessary commas from the end of the string
+                        while (temp.EndsWith(","))
+                        {
+                            temp = temp.Remove(temp.LastIndexOf(','), 1);
+                        }
+
+                        // add the printed true/false flag to each now
+                        if (!temp.EndsWith("True", StringComparison.CurrentCultureIgnoreCase) &&
+                            !temp.EndsWith("False", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            temp = temp + ",False\r\n";
+                        }
+                        builder.AppendLine(temp);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            row["Printed"] = "Printed";
+                        }
+                        catch (Exception ex)
+                        { }
+                    }
+                }
+                dataset.Tables.Clear();
+                dataset.Tables.Add(table);
+                tableCollection.Remove(table);
+                foreach (DataTable dt in tableCollection)
+                {
+                    dataset.Tables.Add(dt);
+                }
+
+                XElement location = new XElement("Root",
+                    from str in builder.ToString().Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                    let fields = str.Split(',')
+
+                    select new XElement("GLNLocation",
+                        new XElement("Region", fields[0]),
+                        new XElement("Site", fields[1]),
+                        new XElement("Building", fields[2]),
+                        new XElement("Floor", fields[3]),
+                        new XElement("Room", fields[4]),
+                        new XElement("Code", fields[5]),
+                        new XElement("GLN", fields[6]),
+                        new XElement("GLNCreationDate", fields[7]),
+                        new XElement("Printed", fields[8])));
+
+                XmlSchemaSet schemaSet = AddXMLSchema();
+                xDoc = XDocument.Parse(location.ToString());
+                if (xDoc == null | xDoc.Root == null)
+                {
+                    throw new ApplicationException("xml error: the referenced stream is not xml.");
+                }
+
+                xDoc.Validate(schemaSet, (o, e) =>
+                {
+                    throw new ApplicationException("xsd validation error: xml file has structural problems");
+                });
+
+                try
+                {
+                    if (File.Exists(filename))
+                        File.Delete(filename);
+
+                    stream = File.Open(filename, FileMode.CreateNew, FileAccess.ReadWrite);
+                    using (SpreadsheetDocument document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
+                    {
+                        ExcelFunctions.WriteExcelFile(dataset, document);
+                    }
+                    stream.Close();
+                }
+                catch (Exception ex)
+                {
+
                 }
             }
             catch (IndexOutOfRangeException ex)
@@ -222,7 +396,15 @@ namespace AndroidZebraPrint
 
         public IEnumerable<string> GetFileList()
         {
-            return Directory.EnumerateFiles(Directorypath, FILE_EXTENSION, SearchOption.TopDirectoryOnly);
+            var directory = new DirectoryInfo(Directorypath);
+            var masks = new[] { "*.csv", "*.xlsx" };
+            var files = masks.SelectMany(directory.EnumerateFiles);
+            List<string> fileList = new List<string>();
+            foreach (FileInfo file in files)
+            {
+                fileList.Add(file.DirectoryName + "/" + file.Name);
+            }
+            return fileList;
         }
 
         public object LoadGLNFile(string filename)
@@ -231,8 +413,18 @@ namespace AndroidZebraPrint
             {
                 if (File.Exists(filename))
                 {
-                    XDocument xDoc = TransformCSVToXML(filename);
-                    return xDoc;
+                    if (filename.Contains(".csv"))
+                    {
+                        XDocument doc = new XDocument();
+                        doc = TransformCSVToXML(filename);
+                        return doc;
+                    }
+                    else if (filename.Contains(".xlsx"))
+                    {
+                        XDocument doc = new XDocument();
+                        doc = TransformXLSToXML(filename);
+                        return doc;
+                    }
                 }
             }
             catch (IndexOutOfRangeException oorex)
@@ -250,6 +442,68 @@ namespace AndroidZebraPrint
 
         public void SaveLocation(string filename, IGLNLocation iGLNLocation)
         {
+            if (filename.Contains(".csv"))
+            {
+                SaveCSVLocation(filename, iGLNLocation);
+            }
+            else if (filename.Contains(".xlsx"))
+            {
+                SaveXLSLocation(filename, iGLNLocation);
+            }
+        }
+
+        private void SaveXLSLocation(string filename, IGLNLocation iGLNLocation)
+        {
+            FileStream stream = File.Open(filename, FileMode.Open, FileAccess.ReadWrite);
+            IExcelDataReader excelReader;
+
+            if (filename.Contains(".xlsx"))
+            {
+                excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+            }
+            else
+            {
+                excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
+            }
+            stream.Close();
+
+            excelReader.IsFirstRowAsColumnNames = true;
+            DataSet dataset = excelReader.AsDataSet();
+
+            DataRowCollection rowCollection = dataset.Tables[0].Rows;
+
+            foreach (DataRow row in rowCollection)
+            {
+                if (row[11].ToString().Contains(iGLNLocation.GLN))
+                {
+                    string printed = (string)row[13];
+                    printed = Regex.Replace(printed, "False", "True", RegexOptions.IgnoreCase);
+                    row[13] = printed;
+
+                    break;
+                }
+            }
+
+            try
+            {
+                if (File.Exists(filename))
+                    File.Delete(filename);
+
+                stream = File.Open(filename, FileMode.Create, FileAccess.ReadWrite);
+                using (SpreadsheetDocument document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
+                {
+                    ExcelFunctions.WriteExcelFile(dataset, document);
+                }
+                stream.Close();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private void SaveCSVLocation(string filename, IGLNLocation iGLNLocation)
+        { 
             StreamReader reader = new StreamReader(filename);
             string content = reader.ReadToEnd();
             reader.Close();

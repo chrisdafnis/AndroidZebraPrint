@@ -26,6 +26,45 @@ namespace AndroidZebraPrint
 		
 		public static void UpdateIdValues()
 		{
+			global::AndroidHUD.Resource.Attribute.ahBarColor = global::AndroidZebraPrint.Resource.Attribute.ahBarColor;
+			global::AndroidHUD.Resource.Attribute.ahBarLength = global::AndroidZebraPrint.Resource.Attribute.ahBarLength;
+			global::AndroidHUD.Resource.Attribute.ahBarWidth = global::AndroidZebraPrint.Resource.Attribute.ahBarWidth;
+			global::AndroidHUD.Resource.Attribute.ahCircleColor = global::AndroidZebraPrint.Resource.Attribute.ahCircleColor;
+			global::AndroidHUD.Resource.Attribute.ahDelayMillis = global::AndroidZebraPrint.Resource.Attribute.ahDelayMillis;
+			global::AndroidHUD.Resource.Attribute.ahRadius = global::AndroidZebraPrint.Resource.Attribute.ahRadius;
+			global::AndroidHUD.Resource.Attribute.ahRimColor = global::AndroidZebraPrint.Resource.Attribute.ahRimColor;
+			global::AndroidHUD.Resource.Attribute.ahRimWidth = global::AndroidZebraPrint.Resource.Attribute.ahRimWidth;
+			global::AndroidHUD.Resource.Attribute.ahSpinSpeed = global::AndroidZebraPrint.Resource.Attribute.ahSpinSpeed;
+			global::AndroidHUD.Resource.Attribute.ahText = global::AndroidZebraPrint.Resource.Attribute.ahText;
+			global::AndroidHUD.Resource.Attribute.ahTextColor = global::AndroidZebraPrint.Resource.Attribute.ahTextColor;
+			global::AndroidHUD.Resource.Attribute.ahTextSize = global::AndroidZebraPrint.Resource.Attribute.ahTextSize;
+			global::AndroidHUD.Resource.Drawable.ic_errorstatus = global::AndroidZebraPrint.Resource.Drawable.ic_errorstatus;
+			global::AndroidHUD.Resource.Drawable.ic_successstatus = global::AndroidZebraPrint.Resource.Drawable.ic_successstatus;
+			global::AndroidHUD.Resource.Drawable.roundedbg = global::AndroidZebraPrint.Resource.Drawable.roundedbg;
+			global::AndroidHUD.Resource.Drawable.roundedbgdark = global::AndroidZebraPrint.Resource.Drawable.roundedbgdark;
+			global::AndroidHUD.Resource.Id.loadingImage = global::AndroidZebraPrint.Resource.Id.loadingImage;
+			global::AndroidHUD.Resource.Id.loadingProgressBar = global::AndroidZebraPrint.Resource.Id.loadingProgressBar;
+			global::AndroidHUD.Resource.Id.loadingProgressWheel = global::AndroidZebraPrint.Resource.Id.loadingProgressWheel;
+			global::AndroidHUD.Resource.Id.textViewStatus = global::AndroidZebraPrint.Resource.Id.textViewStatus;
+			global::AndroidHUD.Resource.Layout.loading = global::AndroidZebraPrint.Resource.Layout.loading;
+			global::AndroidHUD.Resource.Layout.loadingimage = global::AndroidZebraPrint.Resource.Layout.loadingimage;
+			global::AndroidHUD.Resource.Layout.loadingprogress = global::AndroidZebraPrint.Resource.Layout.loadingprogress;
+			global::AndroidHUD.Resource.String.library_name = global::AndroidZebraPrint.Resource.String.library_name;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahBarColor = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahBarColor;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahBarLength = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahBarLength;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahBarWidth = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahBarWidth;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahCircleColor = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahCircleColor;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahDelayMillis = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahDelayMillis;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahRadius = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahRadius;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahRimColor = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahRimColor;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahRimWidth = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahRimWidth;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahSpinSpeed = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahSpinSpeed;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahText = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahText;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahTextColor = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahTextColor;
+			global::AndroidHUD.Resource.Styleable.ProgressWheel_ahTextSize = global::AndroidZebraPrint.Resource.Styleable.ProgressWheel_ahTextSize;
+			global::ExcelDataReader.Android.Resource.String.ApplicationName = global::AndroidZebraPrint.Resource.String.ApplicationName;
+			global::ExcelDataReader.Android.Resource.String.Hello = global::AndroidZebraPrint.Resource.String.Hello;
 			global::Xamarin.Forms.Platform.Resource.String.ApplicationName = global::AndroidZebraPrint.Resource.String.ApplicationName;
 			global::Xamarin.Forms.Platform.Resource.String.Hello = global::AndroidZebraPrint.Resource.String.Hello;
 		}
@@ -51,6 +90,42 @@ namespace AndroidZebraPrint
 		
 		public partial class Attribute
 		{
+			
+			// aapt resource value: 0x7f010003
+			public const int ahBarColor = 2130771971;
+			
+			// aapt resource value: 0x7f01000b
+			public const int ahBarLength = 2130771979;
+			
+			// aapt resource value: 0x7f01000a
+			public const int ahBarWidth = 2130771978;
+			
+			// aapt resource value: 0x7f010008
+			public const int ahCircleColor = 2130771976;
+			
+			// aapt resource value: 0x7f010007
+			public const int ahDelayMillis = 2130771975;
+			
+			// aapt resource value: 0x7f010009
+			public const int ahRadius = 2130771977;
+			
+			// aapt resource value: 0x7f010004
+			public const int ahRimColor = 2130771972;
+			
+			// aapt resource value: 0x7f010005
+			public const int ahRimWidth = 2130771973;
+			
+			// aapt resource value: 0x7f010006
+			public const int ahSpinSpeed = 2130771974;
+			
+			// aapt resource value: 0x7f010000
+			public const int ahText = 2130771968;
+			
+			// aapt resource value: 0x7f010001
+			public const int ahTextColor = 2130771969;
+			
+			// aapt resource value: 0x7f010002
+			public const int ahTextSize = 2130771970;
 			
 			static Attribute()
 			{
@@ -91,13 +166,25 @@ namespace AndroidZebraPrint
 			public const int dakota_logo = 2130837506;
 			
 			// aapt resource value: 0x7f020003
-			public const int Icon = 2130837507;
+			public const int ic_errorstatus = 2130837507;
 			
 			// aapt resource value: 0x7f020004
-			public const int list_selector = 2130837508;
+			public const int ic_successstatus = 2130837508;
 			
 			// aapt resource value: 0x7f020005
-			public const int list_selector_pressed = 2130837509;
+			public const int Icon = 2130837509;
+			
+			// aapt resource value: 0x7f020006
+			public const int list_selector = 2130837510;
+			
+			// aapt resource value: 0x7f020007
+			public const int list_selector_pressed = 2130837511;
+			
+			// aapt resource value: 0x7f020008
+			public const int roundedbg = 2130837512;
+			
+			// aapt resource value: 0x7f020009
+			public const int roundedbgdark = 2130837513;
 			
 			static Drawable()
 			{
@@ -112,35 +199,35 @@ namespace AndroidZebraPrint
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f090015
-			public const int About = 2131296277;
+			// aapt resource value: 0x7f090019
+			public const int About = 2131296281;
 			
-			// aapt resource value: 0x7f090011
-			public const int FindPrinters = 2131296273;
+			// aapt resource value: 0x7f090015
+			public const int FindPrinters = 2131296277;
 			
 			// aapt resource value: 0x7f090009
 			public const int ListItemRowText = 2131296265;
 			
-			// aapt resource value: 0x7f090012
-			public const int LoadDataFile = 2131296274;
-			
-			// aapt resource value: 0x7f090010
-			public const int LoadFile = 2131296272;
-			
-			// aapt resource value: 0x7f09000b
-			public const int PrintButton = 2131296267;
-			
-			// aapt resource value: 0x7f09000f
-			public const int PrintQuantity = 2131296271;
-			
 			// aapt resource value: 0x7f090016
-			public const int Quit = 2131296278;
-			
-			// aapt resource value: 0x7f090013
-			public const int RowInfo = 2131296275;
+			public const int LoadDataFile = 2131296278;
 			
 			// aapt resource value: 0x7f090014
-			public const int SearchLocation = 2131296276;
+			public const int LoadFile = 2131296276;
+			
+			// aapt resource value: 0x7f09000f
+			public const int PrintButton = 2131296271;
+			
+			// aapt resource value: 0x7f090013
+			public const int PrintQuantity = 2131296275;
+			
+			// aapt resource value: 0x7f09001a
+			public const int Quit = 2131296282;
+			
+			// aapt resource value: 0x7f090017
+			public const int RowInfo = 2131296279;
+			
+			// aapt resource value: 0x7f090018
+			public const int SearchLocation = 2131296280;
 			
 			// aapt resource value: 0x7f090001
 			public const int aboutAppname = 2131296257;
@@ -166,20 +253,32 @@ namespace AndroidZebraPrint
 			// aapt resource value: 0x7f090005
 			public const int fileListView = 2131296261;
 			
+			// aapt resource value: 0x7f09000c
+			public const int loadingImage = 2131296268;
+			
 			// aapt resource value: 0x7f09000a
-			public const int locationInfoText = 2131296266;
+			public const int loadingProgressBar = 2131296266;
 			
 			// aapt resource value: 0x7f09000d
-			public const int locationsView = 2131296269;
+			public const int loadingProgressWheel = 2131296269;
+			
+			// aapt resource value: 0x7f09000e
+			public const int locationInfoText = 2131296270;
+			
+			// aapt resource value: 0x7f090011
+			public const int locationsView = 2131296273;
 			
 			// aapt resource value: 0x7f090008
 			public const int printerListView = 2131296264;
 			
-			// aapt resource value: 0x7f09000c
-			public const int selectedPrinterTxt = 2131296268;
+			// aapt resource value: 0x7f090010
+			public const int selectedPrinterTxt = 2131296272;
 			
-			// aapt resource value: 0x7f09000e
-			public const int spinnerQty = 2131296270;
+			// aapt resource value: 0x7f090012
+			public const int spinnerQty = 2131296274;
+			
+			// aapt resource value: 0x7f09000b
+			public const int textViewStatus = 2131296267;
 			
 			static Id()
 			{
@@ -213,13 +312,22 @@ namespace AndroidZebraPrint
 			public const int LoadData = 2130903045;
 			
 			// aapt resource value: 0x7f030006
-			public const int LocationInfo = 2130903046;
+			public const int loading = 2130903046;
 			
 			// aapt resource value: 0x7f030007
-			public const int Main = 2130903047;
+			public const int loadingimage = 2130903047;
 			
 			// aapt resource value: 0x7f030008
-			public const int PrintQuantity = 2130903048;
+			public const int loadingprogress = 2130903048;
+			
+			// aapt resource value: 0x7f030009
+			public const int LocationInfo = 2130903049;
+			
+			// aapt resource value: 0x7f03000a
+			public const int Main = 2130903050;
+			
+			// aapt resource value: 0x7f03000b
+			public const int PrintQuantity = 2130903051;
 			
 			static Layout()
 			{
@@ -253,74 +361,77 @@ namespace AndroidZebraPrint
 		public partial class String
 		{
 			
+			// aapt resource value: 0x7f040004
+			public const int About = 2130968580;
+			
+			// aapt resource value: 0x7f04000f
+			public const int AboutBox = 2130968591;
+			
+			// aapt resource value: 0x7f040011
+			public const int AboutBoxText = 2130968593;
+			
 			// aapt resource value: 0x7f040003
-			public const int About = 2130968579;
-			
-			// aapt resource value: 0x7f04000e
-			public const int AboutBox = 2130968590;
-			
-			// aapt resource value: 0x7f040010
-			public const int AboutBoxText = 2130968592;
-			
-			// aapt resource value: 0x7f040002
-			public const int AppName = 2130968578;
+			public const int AppName = 2130968579;
 			
 			// aapt resource value: 0x7f040001
 			public const int ApplicationName = 2130968577;
 			
-			// aapt resource value: 0x7f040007
-			public const int Discovered = 2130968583;
-			
-			// aapt resource value: 0x7f040006
-			public const int Find = 2130968582;
-			
-			// aapt resource value: 0x7f04000b
-			public const int FindFiles = 2130968587;
-			
 			// aapt resource value: 0x7f040008
-			public const int FindPrinters = 2130968584;
+			public const int Discovered = 2130968584;
+			
+			// aapt resource value: 0x7f040007
+			public const int Find = 2130968583;
+			
+			// aapt resource value: 0x7f04000c
+			public const int FindFiles = 2130968588;
+			
+			// aapt resource value: 0x7f040009
+			public const int FindPrinters = 2130968585;
 			
 			// aapt resource value: 0x7f040000
 			public const int Hello = 2130968576;
 			
-			// aapt resource value: 0x7f040009
-			public const int LoadDataFile = 2130968585;
-			
-			// aapt resource value: 0x7f040012
-			public const int LoadLocations = 2130968594;
-			
 			// aapt resource value: 0x7f04000a
-			public const int NoPrinter = 2130968586;
-			
-			// aapt resource value: 0x7f040005
-			public const int Print = 2130968581;
+			public const int LoadDataFile = 2130968586;
 			
 			// aapt resource value: 0x7f040013
-			public const int PrintQuantity = 2130968595;
+			public const int LoadLocations = 2130968595;
 			
-			// aapt resource value: 0x7f040016
-			public const int Quantity_prompt = 2130968598;
+			// aapt resource value: 0x7f04000b
+			public const int NoPrinter = 2130968587;
 			
-			// aapt resource value: 0x7f040004
-			public const int Quit = 2130968580;
+			// aapt resource value: 0x7f040006
+			public const int Print = 2130968582;
 			
 			// aapt resource value: 0x7f040014
-			public const int QuitApplication = 2130968596;
+			public const int PrintQuantity = 2130968596;
+			
+			// aapt resource value: 0x7f040017
+			public const int Quantity_prompt = 2130968599;
+			
+			// aapt resource value: 0x7f040005
+			public const int Quit = 2130968581;
 			
 			// aapt resource value: 0x7f040015
-			public const int QuitPrompt = 2130968597;
+			public const int QuitApplication = 2130968597;
 			
-			// aapt resource value: 0x7f04000c
-			public const int RowInfo = 2130968588;
+			// aapt resource value: 0x7f040016
+			public const int QuitPrompt = 2130968598;
 			
 			// aapt resource value: 0x7f04000d
-			public const int SearchLocation = 2130968589;
+			public const int RowInfo = 2130968589;
 			
-			// aapt resource value: 0x7f040011
-			public const int SearchPrinters = 2130968593;
+			// aapt resource value: 0x7f04000e
+			public const int SearchLocation = 2130968590;
 			
-			// aapt resource value: 0x7f04000f
-			public const int Version = 2130968591;
+			// aapt resource value: 0x7f040012
+			public const int SearchPrinters = 2130968594;
+			
+			// aapt resource value: 0x7f040010
+			public const int Version = 2130968592;
+			
+			// aapt resource value: 0x7f040002
+			public const int library_name = 2130968578;
 			
 			static String()
 			{
@@ -347,6 +458,69 @@ namespace AndroidZebraPrint
 			}
 			
 			private Style()
+			{
+			}
+		}
+		
+		public partial class Styleable
+		{
+			
+			public static int[] ProgressWheel = new int[] {
+					2130771968,
+					2130771969,
+					2130771970,
+					2130771971,
+					2130771972,
+					2130771973,
+					2130771974,
+					2130771975,
+					2130771976,
+					2130771977,
+					2130771978,
+					2130771979};
+			
+			// aapt resource value: 3
+			public const int ProgressWheel_ahBarColor = 3;
+			
+			// aapt resource value: 11
+			public const int ProgressWheel_ahBarLength = 11;
+			
+			// aapt resource value: 10
+			public const int ProgressWheel_ahBarWidth = 10;
+			
+			// aapt resource value: 8
+			public const int ProgressWheel_ahCircleColor = 8;
+			
+			// aapt resource value: 7
+			public const int ProgressWheel_ahDelayMillis = 7;
+			
+			// aapt resource value: 9
+			public const int ProgressWheel_ahRadius = 9;
+			
+			// aapt resource value: 4
+			public const int ProgressWheel_ahRimColor = 4;
+			
+			// aapt resource value: 5
+			public const int ProgressWheel_ahRimWidth = 5;
+			
+			// aapt resource value: 6
+			public const int ProgressWheel_ahSpinSpeed = 6;
+			
+			// aapt resource value: 0
+			public const int ProgressWheel_ahText = 0;
+			
+			// aapt resource value: 1
+			public const int ProgressWheel_ahTextColor = 1;
+			
+			// aapt resource value: 2
+			public const int ProgressWheel_ahTextSize = 2;
+			
+			static Styleable()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
+			
+			private Styleable()
 			{
 			}
 		}

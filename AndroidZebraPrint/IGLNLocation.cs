@@ -13,6 +13,7 @@ namespace AndroidZebraPrint
         string GLN { get; set; }
         DateTime Date { get; set; }
         string ToString();
+        string Value();
         bool Printed { get; set; }
     }
 }

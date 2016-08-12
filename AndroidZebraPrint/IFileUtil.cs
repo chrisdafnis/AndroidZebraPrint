@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Android.App;
+using System.Collections.Generic;
 
 namespace AndroidZebraPrint
 {

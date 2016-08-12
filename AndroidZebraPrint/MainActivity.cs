@@ -1,7 +1,6 @@
 ﻿using Android.App;
 using Android.Widget;
 using Android.OS;
-using System.Collections.ObjectModel;
 using System;
 using System.Threading.Tasks;
 using System.Text;
@@ -12,6 +11,8 @@ using System.Collections.Generic;
 using static Android.Widget.AdapterView;
 using System.Reflection;
 using Zebra.Sdk.Comm;
+using System.Collections.ObjectModel;
+using AndroidHUD;
 
 //using Com.Mitac.Cell.Device;
 
@@ -27,7 +28,7 @@ namespace AndroidZebraPrint
         int printQuantity = 1;
         string locationsFile;
         int currentSelected = 0;
-        //McSocketIo socketIO;
+        public enum ActivityCode { FindPrinters = 0, PrintQuantity, LoadLocations, About, LocationInfo, LocationSearch };
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -80,7 +81,7 @@ namespace AndroidZebraPrint
             {
                 // load list of locations files
                 var findFilesPage = new Android.Content.Intent(this, typeof(FindFilesActivity));
-                StartActivityForResult(findFilesPage, 3);
+                StartActivityForResult(findFilesPage, (int)ActivityCode.LoadLocations);
             }
             //LoadJar();
             //socketIO = new McSocketIo();
@@ -125,11 +126,11 @@ namespace AndroidZebraPrint
             {
                 case Resource.Id.FindPrinters:
                     var findPrintersPage = new Android.Content.Intent(this, typeof(FindPrintersActivity));
-                    StartActivityForResult(findPrintersPage, 0);
+                    StartActivityForResult(findPrintersPage, (int)ActivityCode.FindPrinters);
                     return true;
                 case Resource.Id.LoadDataFile:
                     var findFilesPage = new Android.Content.Intent(this, typeof(FindFilesActivity));
-                    StartActivityForResult(findFilesPage, 3);
+                    StartActivityForResult(findFilesPage, (int)ActivityCode.LoadLocations);
                     return true;
                 case Resource.Id.RowInfo:
                     var rowInfoPage = new Android.Content.Intent(this, typeof(LocationInfoActivity));
@@ -151,15 +152,15 @@ namespace AndroidZebraPrint
                         location.GLN,
                         location.Date.ToString());
                     rowInfoPage.PutExtra("location", info);
-                    StartActivityForResult(rowInfoPage, 5);
+                    StartActivityForResult(rowInfoPage, (int)ActivityCode.LocationInfo);
                     return true;
                 case Resource.Id.About:
                     var aboutPage = new Android.Content.Intent(this, typeof(AboutButtonActivity));
-                    StartActivityForResult(aboutPage, 4);
+                    StartActivityForResult(aboutPage, (int)ActivityCode.About);
                     return true;
                 case Resource.Id.SearchLocation:
                     var searchLocationPage = new Android.Content.Intent(this, typeof(FindLocationActivity));
-                    StartActivityForResult(searchLocationPage, 6);
+                    StartActivityForResult(searchLocationPage, (int)ActivityCode.LocationSearch);
                     return true;
                 case Resource.Id.Quit:
                     AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -180,130 +181,153 @@ namespace AndroidZebraPrint
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
-            if (requestCode == 0)   // result from FindPrinters
+            switch ((ActivityCode)requestCode)
             {
-                if (resultCode == Result.Ok)
-                {
-                    String result = data.GetStringExtra("result");
-                    LoadXMLSettings();
-                }
-                if (resultCode == Result.Canceled)
-                {
-                    //Write your code if there's no result
-                }
-            }
-            else if (requestCode == 1)  // result from LoadData
-            {
-                if (resultCode == Result.Ok)
-                {
-                    
-                }
-                if (resultCode == Result.Canceled)
-                {
-                    //Write your code if there's no result
-                }
-            }
-            else if (requestCode == 2)   // result from PrintQuantity
-            {
-                if (resultCode == Result.Ok)
-                {
-                    printQuantity = data.GetIntExtra("quantity", 1);
-                    new Task(new Action(() => {
-                        SendZplOverBluetooth(); 
-                    })).Start();
-                    try
+                case ActivityCode.FindPrinters:
                     {
-                        currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
-                        View selected = locationsView.GetChildAt(currentSelected);
-                        ((CustomArrayAdapter)locationsView.Adapter).SetPrintedIndex(currentSelected);
-                        fileUtility.SaveLocation(locationsFile, locationList[currentSelected]);
-                    }
-                    catch (Exception ex)
-                    {
-                        //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                        fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
-                    }
-                }
-                if (resultCode == Result.Canceled)
-                {
-                    //Write your code if there's no result
-                }
-            }
-            else if (requestCode == 3)   // result from Load Locations file
-            {
-                if (resultCode == Result.Ok)
-                {
-                    locationsFile = data.GetStringExtra("filename");
-                    LoadLocations(locationsFile);
-                }
-                if (resultCode == Result.Canceled)
-                {
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-                    dialogBuilder.SetTitle("File Not Found");
-                    dialogBuilder.SetMessage("No GLN Locations files found on SD card. Application will now exit.");
-                    dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
-                    dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate
-                    {
-                        this.Finish();
-                    });
-                    dialogBuilder.Show();
-                }
-            }
-            else if (requestCode == 5)   // result from LocationInfo
-            {
-                if (resultCode == Result.Ok)
-                {
-                }
-                if (resultCode == Result.Canceled)
-                {
-                    //Write your code if there's no result
-                }
-            }
-            else if (requestCode == 6)   // result from Location Search
-            {
-                if (resultCode == Result.Ok)
-                {
-                    string searchLocation = data.GetStringExtra("location");
-                    CustomArrayAdapter adapter = (CustomArrayAdapter)locationsView.Adapter;
-                    int i = 0;
-                    bool found = false;
-                    foreach (IGLNLocation location in locationList)
-                    {
-                        if (location.Code == searchLocation)
+                        if (resultCode == Result.Ok)
                         {
-                            found = true;
-                            adapter.SetSelectedIndex(i);
-                            currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
-                            locationsView.SmoothScrollToPosition(i);
-                            break;
+                            String result = data.GetStringExtra("result");
+                            LoadXMLSettings();
                         }
-                        i++;
+                        if (resultCode == Result.Canceled)
+                        {
+                            //Write your code if there's no result
+                        }
                     }
-                    if (!found)
+                    break;
+                case ActivityCode.PrintQuantity:
                     {
-                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-                        dialogBuilder.SetTitle("Code Not Found");
-                        dialogBuilder.SetMessage("The room code '" + searchLocation + "' does not exist in the current database");
-                        dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
-                        dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate { });
-                        dialogBuilder.Show();
+                        if (resultCode == Result.Ok)
+                        {
+                            printQuantity = data.GetIntExtra("quantity", 1);
+                            new Task(new Action(() =>
+                            {
+                                SendZplOverBluetooth();
+                            })).Start();
+                            try
+                            {
+                                currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
+                                View selected = locationsView.GetChildAt(currentSelected);
+                                ((CustomArrayAdapter)locationsView.Adapter).SetPrintedIndex(currentSelected);
+                                SaveFile(locationsFile, locationList[currentSelected]);
+                                //fileUtility.SaveLocation(locationsFile, locationList[currentSelected]);
+                            }
+                            catch (Exception ex)
+                            {
+                                //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
+                            }
+                        }
+                        if (resultCode == Result.Canceled)
+                        {
+                            //Write your code if there's no result
+                        }
                     }
-                }
-                if (resultCode == Result.Canceled)
-                {
-                    //Write your code if there's no result
-                }
+                    break;
+                case ActivityCode.LoadLocations:
+                    {
+                        if (resultCode == Result.Ok)
+                        {
+                            locationsFile = data.GetStringExtra("filename");
+                            LoadFile(locationsFile);
+                        }
+                        if (resultCode == Result.Canceled)
+                        {
+                            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                            dialogBuilder.SetTitle("File Not Found");
+                            dialogBuilder.SetMessage("No GLN Locations files found on SD card. Application will now exit.");
+                            dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
+                            dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate
+                            {
+                                this.Finish();
+                            });
+                            dialogBuilder.Show();
+                        }
+                    }
+                    break;
+                case ActivityCode.LocationInfo:
+                    {
+                        if (resultCode == Result.Ok)
+                        {
+                        }
+                        if (resultCode == Result.Canceled)
+                        {
+                            //Write your code if there's no result
+                        }
+                    }
+                    break;
+                case ActivityCode.LocationSearch:
+                    {
+                        if (resultCode == Result.Ok)
+                        {
+                            string searchLocation = data.GetStringExtra("location");
+                            CustomArrayAdapter adapter = (CustomArrayAdapter)locationsView.Adapter;
+                            int i = 0;
+                            bool found = false;
+                            foreach (IGLNLocation location in locationList)
+                            {
+                                if (location.Code == searchLocation)
+                                {
+                                    found = true;
+                                    adapter.SetSelectedIndex(i);
+                                    currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
+                                    locationsView.SmoothScrollToPosition(i);
+                                    break;
+                                }
+                                i++;
+                            }
+                            if (!found)
+                            {
+                                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                                dialogBuilder.SetTitle("Code Not Found");
+                                dialogBuilder.SetMessage("The room code '" + searchLocation + "' does not exist in the current database");
+                                dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
+                                dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate { });
+                                dialogBuilder.Show();
+                            }
+                        }
+                        if (resultCode == Result.Canceled)
+                        {
+                            //Write your code if there's no result
+                        }
+                    }
+                    break;
             }
         }
 
-        private void LoadLocations(string filename)
+        public async void SaveFile(string filename, IGLNLocation location)
         {
-            XDocument xDoc = (XDocument)fileUtility.LoadGLNFile(filename);
+            try
+            {
+                AndHUD.Shared.Show(this, "Updating...", -1, MaskType.Black);
+                await Task.Factory.StartNew(() => fileUtility.SaveLocation(filename, location));
+                AndHUD.Shared.Dismiss(this);
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+        public async void LoadFile(string filename)
+        {
+            string xmlString = String.Empty;
+            object res = null;
+            try
+            {
+                AndHUD.Shared.Show(this, "Loading...", -1, MaskType.Black);
+                Func<string> function = new Func<string>(() => LoadLocations(filename).Result);
+                res = await Task.Factory.StartNew<string>(function);
+                AndHUD.Shared.Dismiss(this);
+            }
+            catch (Exception ex)
+            { }
+
+            XDocument xDoc = XDocument.Parse((string)res);
             if (xDoc != null)
             {
-                locationList = new ObservableCollection<IGLNLocation>();
+                locationList = new System.Collections.ObjectModel.ObservableCollection<IGLNLocation>();
                 XName xName = XName.Get("GLNLocation");
 
                 foreach (XElement xElem in xDoc.Descendants("GLNLocation"))
@@ -337,10 +361,10 @@ namespace AndroidZebraPrint
                     }
 
                     locationsView.ItemClick += (object sender, ItemClickEventArgs e) =>
-                        {
-                            ((CustomArrayAdapter)((ListView)sender).Adapter).SetSelectedIndex(e.Position);
-                            currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
-                        };
+                    {
+                        ((CustomArrayAdapter)((ListView)sender).Adapter).SetSelectedIndex(e.Position);
+                        currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
+                    };
                 }
                 catch (Exception ex)
                 {
@@ -360,8 +384,16 @@ namespace AndroidZebraPrint
             }
         }
 
-        private void SaveLocations(string filename)
+        private async Task<string> LoadLocations(string filename)
         {
+            XDocument xDoc = (XDocument)fileUtility.LoadGLNFile(filename);
+            string returnValue = String.Concat(@"<?xml version=""1.0"" encoding=""utf-8"" ?>", xDoc.ToString());
+            return returnValue;
+        }
+
+        private async Task SaveLocations(string filename, IGLNLocation location)
+        {
+            fileUtility.SaveLocation(filename, location);
         }
 
         private void LoadXMLSettings()
@@ -384,7 +416,7 @@ namespace AndroidZebraPrint
             if (CheckPrinter())
             {
                 var printQuantityPage = new Android.Content.Intent(this, typeof(PrintQuantityActivity));
-                StartActivityForResult(printQuantityPage, 2);
+                StartActivityForResult(printQuantityPage, (int)ActivityCode.PrintQuantity);
                 locationsView = ((ListView)FindViewById<ListView>(Resource.Id.locationsView));
             }
         }
@@ -441,10 +473,20 @@ namespace AndroidZebraPrint
             }
             else
             {
-
-                zpl +=
-                    @"^BY3,3,230^FT508,109^BCI,,N,N^FD>;>8414" + locationList[currentSelected].GLN + "^FS" + "\r\n" +
-                    @"^FT441,71^A0I,34,33^FB276,1,0,C^FH\^FD(414)" + locationList[currentSelected].GLN + "\r\n";
+                if (locationList[currentSelected].Region == "ROYAL CORNWALL HOSPITALS NHS TRUST")
+                {
+                    // Royal Cornwall want the room code above the barcode
+                    zpl +=
+                        @"^FT541,360^A0I,34,33^FD" + "Estates Room Number:" + locationList[currentSelected].Code + "^FS" + "\r\n" +
+                        @"^BY3,3,230^FT508,109^BCI,,N,N^FD>;>8414" + locationList[currentSelected].GLN + "^FS" + "\r\n" +
+                        @"^FT441,71^A0I,34,33^FB276,1,0,C^FH\^FD(414)" + locationList[currentSelected].GLN + "\r\n";
+                }
+                else
+                {
+                    zpl +=
+                        @"^BY3,3,230^FT508,109^BCI,,N,N^FD>;>8414" + locationList[currentSelected].GLN + "^FS" + "\r\n" +
+                        @"^FT441,71^A0I,34,33^FB276,1,0,C^FH\^FD(414)" + locationList[currentSelected].GLN + "\r\n";
+                }
             }
             zpl += @"^PQ" + printQuantity + ",0,1,Y^XZ" + "\r\n";
             return zpl;

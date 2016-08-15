@@ -308,6 +308,8 @@ namespace AndroidZebraPrint
             }
             catch (Exception ex)
             {
+                //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
             }
         }
         public async void LoadFile(string filename)
@@ -322,7 +324,9 @@ namespace AndroidZebraPrint
                 AndHUD.Shared.Dismiss(this);
             }
             catch (Exception ex)
-            { }
+            {//call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+            }
 
             XDocument xDoc = XDocument.Parse((string)res);
             if (xDoc != null)

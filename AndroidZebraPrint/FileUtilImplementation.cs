@@ -326,7 +326,10 @@ namespace AndroidZebraPrint
                             row["Printed"] = "Printed";
                         }
                         catch (Exception ex)
-                        { }
+                        {
+                            //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                            LogFile(ex.Message+" :1", ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+                        }
                     }
                 }
                 dataset.Tables.Clear();
@@ -378,13 +381,14 @@ namespace AndroidZebraPrint
                 }
                 catch (Exception ex)
                 {
-
+                    //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                    LogFile(ex.Message + " :2", ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
                 }
             }
             catch (IndexOutOfRangeException ex)
             {
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+                LogFile(ex.Message + " :3", ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
             }
             return xDoc;
         }
@@ -430,12 +434,12 @@ namespace AndroidZebraPrint
             catch (IndexOutOfRangeException oorex)
             {
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                LogFile(oorex.Message, oorex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(oorex), GetType().Name);
+                LogFile(oorex.Message + " :4", oorex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(oorex), GetType().Name);
             }
             catch (Exception ex)
             {
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+                LogFile(ex.Message + " :5", ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
             }
             return null;
         }
@@ -498,7 +502,8 @@ namespace AndroidZebraPrint
             }
             catch (Exception ex)
             {
-
+                //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                LogFile(ex.Message + " :6", ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
             }
         }
 
@@ -545,12 +550,12 @@ namespace AndroidZebraPrint
             catch (IndexOutOfRangeException oorex)
             {
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                LogFile(oorex.Message, oorex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(oorex), GetType().Name);
+                LogFile(oorex.Message + " :7", oorex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(oorex), GetType().Name);
             }
             catch (Exception ex)
             {
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+                LogFile(ex.Message + " :8", ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
             }
             return null;
         }

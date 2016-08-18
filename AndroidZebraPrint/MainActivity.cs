@@ -438,6 +438,7 @@ namespace AndroidZebraPrint
 
                 // Actual Label
                 string zplData = GetZplGLNLabel(locationList[currentSelected]);
+                fileUtility.LogFile("ZPL Output Debug", zplData, "MainActivity", 440, "SendZplOverBluetooth");
 
                 // Send the data to printer as a byte array.
                 //connection.Write(GetBytes(zplData));
@@ -481,9 +482,12 @@ namespace AndroidZebraPrint
                 {
                     // Royal Cornwall want the room code above the barcode
                     zpl +=
-                        @"^FT541,360^A0I,34,33^FD" + "Estates Room Number:" + locationList[currentSelected].Code + "^FS" + "\r\n" +
-                        @"^BY3,3,230^FT508,109^BCI,,N,N^FD>;>8414" + locationList[currentSelected].GLN + "^FS" + "\r\n" +
-                        @"^FT441,71^A0I,34,33^FB276,1,0,C^FH\^FD(414)" + locationList[currentSelected].GLN + "\r\n";
+                        @"^FT591,340^A0I,54,52^FD" + "Room Number:" + locationList[currentSelected].Code + "^FS" + "\r\n" +
+                        @"^BY3,3,230^FT508,89^BCI,,N,N^FD>;>8414" + locationList[currentSelected].GLN + "^FS" + "\r\n" +
+                        @"^FT441,41^A0I,34,33^FB276,1,0,C^FH\^FD(414)" + locationList[currentSelected].GLN + "\r\n";
+                    //@"^FT591,360^A0I,40,39^FD" + "Room Number:" + locationList[currentSelected].Code + "^FS" + "\r\n" +
+                    //@"^BY3,3,230^FT508,109^BCI,,N,N^FD>;>8414" + locationList[currentSelected].GLN + "^FS" + "\r\n" +
+                    //@"^FT441,71^A0I,34,33^FB276,1,0,C^FH\^FD(414)" + locationList[currentSelected].GLN + "\r\n";
                 }
                 else
                 {

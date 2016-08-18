@@ -268,7 +268,8 @@ namespace AndroidZebraPrint
 
                 DataTable table = dataset.Tables[0];
                 bool hasPrintCol = true;
-                if (table.Columns.Count == 13)
+                //if (table.Columns.Count == 13)
+                if (table.Columns.Count == 8)
                 {
                     table.Columns.Add("Printed", typeof(string), "False");
                     hasPrintCol = false;
@@ -281,16 +282,27 @@ namespace AndroidZebraPrint
                     if (row.ItemArray[1].ToString() != "Region")
                     {
                         GLNLocation glnlocation = new GLNLocation();
-                        glnlocation.Region = row.ItemArray[1].ToString();
-                        glnlocation.Site = row.ItemArray[3].ToString();
-                        glnlocation.Building = row.ItemArray[5].ToString();
-                        glnlocation.Floor = row.ItemArray[7].ToString();
-                        glnlocation.Room = row.ItemArray[9].ToString();
-                        glnlocation.Code = row.ItemArray[10].ToString();
-                        glnlocation.GLN = row.ItemArray[11].ToString();
-                        glnlocation.Date = Convert.ToDateTime(row.ItemArray[12]);
+                        glnlocation.Region = row.ItemArray[0].ToString();
+                        glnlocation.Site = row.ItemArray[1].ToString();
+                        glnlocation.Building = row.ItemArray[2].ToString();
+                        glnlocation.Floor = row.ItemArray[3].ToString();
+                        glnlocation.Room = row.ItemArray[4].ToString();
+                        glnlocation.Code = row.ItemArray[5].ToString();
+                        glnlocation.GLN = row.ItemArray[6].ToString();
+                        glnlocation.Date = Convert.ToDateTime(row.ItemArray[7]);
                         if (hasPrintCol)
-                            glnlocation.Printed = Convert.ToBoolean(row.ItemArray[13]);
+                            glnlocation.Printed = Convert.ToBoolean(row.ItemArray[8]);
+
+                        //glnlocation.Region = row.ItemArray[1].ToString();
+                        //glnlocation.Site = row.ItemArray[3].ToString();
+                        //glnlocation.Building = row.ItemArray[5].ToString();
+                        //glnlocation.Floor = row.ItemArray[7].ToString();
+                        //glnlocation.Room = row.ItemArray[9].ToString();
+                        //glnlocation.Code = row.ItemArray[10].ToString();
+                        //glnlocation.GLN = row.ItemArray[11].ToString();
+                        //glnlocation.Date = Convert.ToDateTime(row.ItemArray[12]);
+                        //if (hasPrintCol)
+                        //    glnlocation.Printed = Convert.ToBoolean(row.ItemArray[13]);
 
                         // clean up site for commas etc
                         glnlocation.Site = glnlocation.Site.TrimStart(' ', '"');

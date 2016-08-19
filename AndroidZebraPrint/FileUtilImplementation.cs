@@ -413,7 +413,7 @@ namespace AndroidZebraPrint
         public IEnumerable<string> GetFileList()
         {
             var directory = new DirectoryInfo(Directorypath);
-            var masks = new[] { "*.csv", "*.xlsx" };
+            var masks = new[] { "*.csv"/*, "*.xlsx"*/ };
             var files = masks.SelectMany(directory.EnumerateFiles);
             List<string> fileList = new List<string>();
             foreach (FileInfo file in files)

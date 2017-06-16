@@ -1,0 +1,777 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LinkOS.Plugin.Abstractions</name>
+    </assembly>
+    <members>
+        <member name="T:LinkOS.Plugin.Abstractions.IBluetoothDiscoverer">
+            <summary>
+            A class that discovers Bluetooth® devices.
+            </summary>
+            <example>
+            <b>Note:</b>Below are 3 methods for doing discovery.  They are platform specific.  Do not attempt to implement all 3 methods.<br></br>
+            <b>Note:</b> There are no cancel discovery methods.  Be carefull when using these to properly dispose of discoverer objects if navigating prior to finishing discovery.
+            <code>
+            using LinkOS.Plugin;
+            using LinkOS.Plugin.Abstractions;
+            
+            private void StartBluetoothDiscovery()
+            {
+                IDiscoveryEventHandler handler = DiscoveryHandlerFactory.Current.GetInstance();
+                handler.OnDiscoveryError += DiscoveryHandler_OnDiscoveryError;
+                handler.OnDiscoveryFinished += DiscoveryHandler_OnDiscoveryFinished;
+                handler.OnFoundPrinter += DiscoveryHandler_OnFoundPrinter;
+            
+                //For Android 
+                BluetoothDiscoverer.Current.FindPrinters(MainActivity.Context, handler);
+                //For iOS
+                BluetoothDiscoverer.Current.FindPrinters(null, handler);
+                //For Forms apps: implement the previous two methods in OS code projects (PrinterDiscoveryImplementation.cs)
+                DependencyService.Get&lt;IPrinterDiscovery&gt;().FindBluetoothPrinters(handler);
+            }
+            private void OnFoundPrinter(IDiscoveryHandler handler, IDiscoveredPrinter discoveredPrinter)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    printerList.Add(discoveredPrinter);
+                });
+            }
+            private void OnDiscoveryError(IDiscoveryHandler handler, string message)
+            {
+                System.Diagnostics.Debug.WriteLine("Discovery Error: " + message);
+            }
+            private void OnDiscoveryFinished(IDiscoveryHandler handler, string message)
+            {
+                System.Diagnostics.Debug.WriteLine("Discovery Compete");
+            }
+            </code></example>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IBluetoothDiscoverer.FindPrinters(System.Object,LinkOS.Plugin.Abstractions.IDiscoveryHandler)">
+            <summary>
+            Find Bluetooth® devices that are discoverable.
+            <b>Note:</b> This method will return all devices found, not just Zebra printers
+            <b>Note:</b> This method should not be called from the application main thread.
+            </summary>
+            <param name="androidContext">Android™ application context.  Pass null if iOS implementation.</param>
+            <param name="handler">a DiscoveryHandler instance that is used to handle discovery events (e.g. found a printer, errors, discovery finished).</param>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IConnection">
+            <summary>
+            A connection to a device.
+            </summary>
+            <example>
+            See IPrinterStatus for PreCheckPrinterStatus() and PostPrintCheckStatus() code.
+            <code>
+            using LinkOS.Plugin;
+            using LinkOS.Plugin.Abstractions;
+            using System.Text;
+            
+            public void PrintTCP()
+            {
+            	IConnection connection = ConnectionBuilder.Current.Build("TCP:192.168.1.100:9100");
+            	Print(connection);
+            }
+            public void PrintBluetooth()
+            {
+            	IConnection connection = ConnectionBuilder.Current.Build("BT:00:22:33:44:55:66");
+            	Print(connection);
+            }
+            public void Print(IConnection connection)
+            {
+                string zpl = "^XA^POI^MNN^LL90^PW400^FO20,20^A0N,50,50^FDTEST^FS^XZ";
+            	
+            	try
+            	{
+            		connection.Open();
+            
+            		if (!CheckPrinterLanguage(connection))
+            			return;
+            		if (!PreCheckPrinterStatus(connection))
+                        return;
+            
+            		connection.Write(Encoding.UTF8.GetBytes(setToZPL + zpl));
+            
+            		PostPrintCheckStatus(connection);
+            	}
+            	catch (Exception e)
+            	{
+            		System.Diagnostics.Debug.WriteLine("Exception:" + e.Message);
+            	}
+            	finally
+            	{
+            		if (connection.IsConnected)
+            			connection.Close();
+            	}
+            }
+            public bool CheckPrinterLanguage(IConnection connection)
+            {
+            	//  Set the printer command languege
+            	connection.Write(GetBytes("! U1 setvar \"device.languages\\" \"zpl\\"\r\n"));
+            	byte[] response = connection.SendAndWaitForResponse(GetBytes("! U1 getvar \"device.languages\\"\r\n"), 500, 100);
+            	string language = Encoding.UTF8.GetString(response, 0, response.Length);
+            	if (!language.Contains("zpl"))
+            	{
+            		ShowErrorAlert("Printer language not set. Not a ZPL printer.");
+            		return false;
+            	}
+            	return true;
+            }
+            </code></example>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:LinkOS.Plugin.Abstractions.IConnection.Initialize(System.String)" -->
+        <member name="M:LinkOS.Plugin.Abstractions.IConnection.Open">
+            <summary>
+            Opens the connection to a device.
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IConnection.Close">
+            <summary>
+            Closes this connection and releases any system resources associated with the connection.
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IConnection.Write(System.Byte[])">
+            <summary>
+            Writes data.length bytes from the specified byte array to this output stream.
+            </summary>
+            <param name="data">the data.</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IConnection.Read">
+            <summary>
+            Reads all the available data from the connection.
+            </summary>
+            <returns>received data</returns>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IConnection.SendAndWaitForResponse(System.Byte[],System.Int32,System.Int32,System.String)">
+            <summary>
+            Sends dataToSend and returns the response data. The software returns immediately if the data received contains terminator. The connection must be open before this method is called. If sendAndWaitForResponse is called when a connection is closed, a ConnectionException is thrown.
+            </summary>
+            <param name="dataToSend"> byte array of data to send</param>
+            <param name="initialResponseTimeout">The maximum time, in milliseconds, to wait for the initial response to be received. If no data is received during this time, the function returns a zero length array</param>
+            <param name="responseCompletionTimeout">After the initial response, if no data is received for this period of time, the input is considered complete and the method returns</param>
+            <param name="terminator"> If the response contains this string, the input is considered complete and the method returns. May be used to avoid waiting for more data when the response is always terminated with a known string. Use null if no terminator is desired.</param>
+            <returns>received data</returns>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IConnection.WaitForData(System.Int32)">
+            <summary>
+            Causes the currently executing thread to sleep until bytesAvailable() > 0, or for a maximum of maxTimeout milliseconds.
+            </summary>
+            <param name="maxTimeout">maximum time in milliseconds to wait for an initial response from the printer.</param>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IConnection.IsConnected">
+            <summary>
+            Returns true if the connection is open.
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IConnection.BytesAvailable">
+            <summary>
+            Returns an estimate of the number of bytes that can be read from this connection without blocking.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IConnection.MaxTimeoutForRead">
+            <summary>
+            Gets or sets the maximum time, in milliseconds, to wait for any data to be received. Recommended setting before opening the connection.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IConnection.TimeToWaitForMoreData">
+            <summary>
+            Gets or sets the maximum time, in milliseconds, to wait in-between reads after the initial read.  Recommended setting before opening the connection.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IConnection.TimeToWaitAfterWrite">
+            <summary>
+            Ignored in Android.  In iOS Bluetooth -overrides the time the write() method will wait after writing data to the stream.  
+            The default time is 60ms.  This method is used to adapt to different Bluetooth radio performance requirements.  
+            If you notice an issues writing bytes, try increasing this time.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IConnection.TimeToWaitAfterRead">
+            <summary>
+            Ignored in Android.  In iOS Bluetooth -overrides the time the read() method will wait after reading data from the stream.  
+            The default time is 10ms.  This method is used to adapt to different Bluetooth radio performance requirements.  
+            If you notice an issues writing bytes, try increasing this time. 
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IConnectionBuilder">
+            <summary>
+            Builds a Connection from a description string. The description string is used to specify a connection to a specific device over TCP or Bluetooth.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:LinkOS.Plugin.Abstractions.IConnectionBuilder.Build(System.String)" -->
+        <member name="T:LinkOS.Plugin.Abstractions.IDiscoveredPrinter">
+            <summary>
+            Container holding information about a discovered printer.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IDiscoveredPrinter.Address">
+            <summary>
+            MAC address, IP Address, or local name of printer.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IDiscoveredPrinter.Connection">
+            <summary>
+            Creates a connection based on the information in the DiscoveredPrinter response
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IDiscoveredPrinter.ToString">
+            <summary>
+            For TCP, this returns the IP Address. For Bluetooth, returns serial number of printer in iOS or MAC address in Android.
+            </summary>
+            <returns>For TCP, this returns the IP Address. For Bluetooth, returns serial number of printer in iOS or MAC address in Android.</returns>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IDiscoveredPrinterBluetooth">
+            <summary>
+            Instance of DiscoveredPrinter that is returned when performing a Bluetooth® discovery.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IDiscoveredPrinterBluetooth.FriendlyName">
+            <summary>
+            The friendly name of the Bluetooth® device
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IDiscoveredPrinterNetwork">
+            <summary>
+            Instance of DiscoveredPrinter that is returned when performing a network discovery.
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IDiscoveredPrinterUsb">
+            <summary>
+            Instance of DiscoveredPrinter that is returned when performing a USB discovery.  Only availible in Android.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IDiscoveredPrinterUsb.HasPermissionToCommunicate">
+            <summary>
+            Verification that the user has given permission to communicate with the USB accessory- the printer.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IDiscoveredPrinterUsb.Device">
+            <summary>
+            The Android™ UsbDevice used by this DiscoveredPrinterUsb instance
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IDiscoveredPrinterUsb.Manager">
+            <summary>
+            The Android™ UsbManager used by this DiscoveredPrinterUsb instance
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IDiscoveredPrinterUsb.RequestPermission(System.Object)">
+            <summary>
+            If request is not added to Android Manifest, you may need to request permision to use the USB device (See sample in IUsbDiscoverer)
+            </summary>
+            <param name="androidContext">the Android Context object</param>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.DiscoveryErrorHandler">
+            <summary>
+            This method is invoked when there is an error during discovery. The discovery will be cancelled when this method is invoked. discoveryFinished() will not be called if this method is invoked.
+            </summary>
+            <param name="handler">the specific IDiscoveryHandler initiating this event</param>
+            <param name="message">the error message</param>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.DiscoveryFinishedHandler">
+            <summary>
+            This method is invoked when discovery is finished.
+            </summary>
+            <param name="handler">the specific IDiscoveryHandler initiating this event</param>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.FoundPrinterHandler">
+            <summary>
+            This method is invoked when a printer has been discovered. This method will be invoked for each printer that is found.
+            </summary>
+            <param name="handler">the specific IDiscoveryHandler initiating this event</param>
+            <param name="discoveredPrinter">a discovered printer.</param>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IDiscoveryHandler">
+            <summary>
+            Interface definition for a callback to be invoked for printer discovery events
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IDiscoveryHandler.FoundPrinter(LinkOS.Plugin.Abstractions.IDiscoveredPrinter)">
+            <summary>
+            This method is invoked when a printer has been discovered. This method will be invoked for each printer that is found.
+            </summary>
+            <param name="discoveredPrinter">a discovered printer.</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IDiscoveryHandler.DiscoveryFinished">
+            <summary>
+            This method is invoked when discovery is finished.
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IDiscoveryHandler.DiscoveryError(System.String)">
+            <summary>
+            This method is invoked when there is an error during discovery. The discovery will be cancelled when this method is invoked. discoveryFinished() will not be called if this method is invoked.
+            </summary>
+            <param name="message">the error message.</param>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IDiscoveryHandlerFactory">
+            <summary>
+            Factory to create a new instance of a IDiscoveryHandler
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IDiscoveryHandlerFactory.GetInstance">
+            <summary>
+            Creates a new instance of the IDiscoveryEventHandler
+            </summary>
+            <returns>new IDiscoveryEventHandler</returns>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IFieldDescription">
+            <summary>
+            This class is used to describe format variable fields. 
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IFieldDescription.FieldName">
+            <summary>
+            In CPCL, this field is always null.
+            In ZPL, this field will correspond to the optional name parameter of the ^FN command, or null if the parameter is not present
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IFieldDescription.FieldNumber">
+            <summary>
+            In CPCL, this number will be the number of the variable field in the format.
+            In ZPL, this number will be the field number specified in the format
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:LinkOS.Plugin.Abstractions.IFileUtil" -->
+        <member name="M:LinkOS.Plugin.Abstractions.IFileUtil.RetrieveFileNames">
+            <summary>
+            Retrieves the names of the files which are stored on the device.
+            This function only works in Link-OS printers.  ZebraLink printers may not properly respond to this command.  Use: 
+            </summary>
+            <code>
+            IConnection.SendAndWaitForResponse("! U1 getvar \"file.dir\\"\r\n", 3000, 1000); or 
+            IConnection.SendAndWaitForResponse("^XA^HWE:*.*^XZ", 3000, 1000); 
+            </code>
+            <returns>list of file names</returns>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IFileUtil.RetrieveFileNames(System.String[])">
+            <summary>
+            Retrieves the names of the files which are stored on the device. This method only returns files which have one of the extensions in extensions.
+            This function only works in Link-OS printers.  ZebraLink printers may not properly respond to this command.  Use: 
+            </summary>
+            <code>IConnection.SendAndWaitForResponse("! U1 getvar \"file.dir\\"\r\n", 3000, 1000); or 
+            IConnection.SendAndWaitForResponse("^XA^HWE:*." + extension + "^XZ", 3000, 1000); 
+            </code>
+            <param name="extensions">the extensions to filter on</param>
+            <returns>list of file names.</returns>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IFileUtil.SendFileContents(System.String)">
+            <summary>
+            Sends the contents of a file to the device.
+            </summary>
+            <param name="filePath"> the full file path (e.g. "/storage/sdcard1/Download/sample.lbl").</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:LinkOS.Plugin.Abstractions.IFormatUtil" -->
+        <member name="M:LinkOS.Plugin.Abstractions.IFormatUtil.GetVariableFields(System.String)">
+            <summary>
+            Returns a list of descriptors of the variable fields in this format.
+            </summary>
+            <param name="formatString">the contents of the recalled format.</param>
+            <returns>a list of field data descriptors. In CPCL the nth element of the list will contain the integer n and no name. In ZPL, each element will contain an ^FN number and a variable name if present. If the format contains multiple ^FNs with the same number, only the last one will be in the result.
+            See IFieldDescription for an example of how variable fields look.</returns>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IFormatUtil.PrintStoredFormat(System.String,System.Collections.Generic.Dictionary{System.Int32,System.String})">
+            <summary>
+            Prints a stored format on the printer, filling in the fields specified by the Map. The values of any format variables will be encoded using the default encoding type. 
+            See System.Text.Encoding for more information about encoding types.
+            </summary>
+            <param name="formatPathOnPrinter"> the location of the file on the printer (e.g. "E:FORMAT.ZPL").</param>
+            <param name="vars">a dictionary which contains the key/value pairs for the stored format. For ZPL formats, the key number should correspond directly to the number of the field in the format. For CPCL formats, the values will be passed in ascending numerical order. </param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IFormatUtil.PrintStoredFormat(System.String,System.String[])">
+            <summary>
+            Prints a stored format on the printer, filling in the fields specified by the array. The values of any format variables will be encoded using the default encoding type. 
+            See System.Text.Encoding for more information about encoding types.
+            </summary>
+            <param name="formatPathOnPrinter"> the name of the format on the printer, including the extension (e.g. "E:FORMAT.ZPL").</param>
+            <param name="vars">an array of strings representing the data to fill into the format. For ZPL formats, index 0 of the array corresponds to field number 2 (^FN2). For CPCL, the variables are passed in the order that they are found in the format.</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IFormatUtil.RetrieveFormatFromPrinter(System.String)">
+            <summary>
+            Retrieves a format from the printer. On a ZPL printer, only .ZPL files are supported. On a CPCL printer, only .FMT and .LBL files are supported.   This function will only pull CPCL files on ZebraLink Mobile printers (RW, MZ, QL+).
+            </summary>
+            <param name="formatPathOnPrinter">the location of the file on the printer (e.g. "E:FORMAT.ZPL").</param>
+            <returns>the contents of the format file.</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:LinkOS.Plugin.Abstractions.IGraphicsUtil" -->
+        <member name="M:LinkOS.Plugin.Abstractions.IGraphicsUtil.PrintImage(System.String,System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Prints an image from the connecting device file system to the connected device as a monochrome image. 
+            Note: if the image resolution is large(e.g. 1024x768) this method may take a long time to execute or throw an OutOfMemoryError exception.
+            </summary>
+            <param name="imageFilePath">Full path to image file. (The image must be either a PNG or JPG).</param>
+            <param name="x">horizontal starting position in dots.</param>
+            <param name="y">vertical starting position in dots.</param>
+            <param name="width">desired width of the printed image. Passing a value less than 1 will preserve original width.</param>
+            <param name="height">desired height of the printed image. Passing a value less than 1 will preserve original height.</param>
+            <param name="insideFormat">boolean value indicating whether this image should be printed by itself (false), or is part of a format being written to the connection (true).</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IGraphicsUtil.StoreImage(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            Stores the specified image to the connected printer as a monochrome image. The image will be stored on the printer at printerDriveAndFileName 
+            with the extension GRF. If a drive letter is not supplied, E will be used as the default (e.g. FILE becomes E:FILE.GRF). If an extension is 
+            supplied, it is ignored (E:FILE.BMP becomes E:FILE.GRF). If the image resolution is large (e.g. 1024x768) this method may take a long time to 
+            execute or throw an OutOfMemoryError exception.
+            </summary>
+            <param name="printerDriveAndFileName">path on the printer where the image will be stored.</param>
+            <param name="imageFilePath">Full path to image file. (The image must be either a PNG or JPG).</param>
+            <param name="width">desired width of the printed image, in dots. Passing -1 will preserve original width.</param>
+            <param name="height">desired height of the printed image, in dots. Passing -1 will preserve original height.</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IGraphicsUtil.PrintImage(System.Object,System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Prints an image from the connecting device system to the connected device as a monochrome image. 
+            Note: if the image resolution is large(e.g. 1024x768) this method may take a long time to execute or throw an OutOfMemoryError exception.
+            </summary>
+            <param name="os_image">In Android - Android.Graphics.Bitmap image. In iOS - a CGImageRef image</param>
+            <param name="x">horizontal starting position in dots.</param>
+            <param name="y">vertical starting position in dots.</param>
+            <param name="width">desired width of the printed image. Passing a value less than 1 will preserve original width.</param>
+            <param name="height">desired height of the printed image. Passing a value less than 1 will preserve original height.</param>
+            <param name="insideFormat">boolean value indicating whether this image should be printed by itself (false), or is part of a format being written to the connection (true).</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IGraphicsUtil.StoreImage(System.String,System.Object,System.Int32,System.Int32)">
+            <summary>
+            Stores the specified image to the connected printer as a monochrome image. The image will be stored on the printer at printerDriveAndFileName 
+            with the extension GRF. If a drive letter is not supplied, E will be used as the default (e.g. FILE becomes E:FILE.GRF). If an extension is 
+            supplied, it is ignored (E:FILE.BMP becomes E:FILE.GRF). If the image resolution is large (e.g. 1024x768) this method may take a long time to 
+            execute or throw an OutOfMemoryError exception.
+            </summary>
+            <param name="printerDriveAndFileName">path on the printer where the image will be stored.</param>
+            <param name="os_image">In Android - Android.Graphics.Bitmap image. In iOS - a CGImageRef image</param>
+            <param name="width">desired width of the printed image, in dots. Passing -1 will preserve original width.</param>
+            <param name="height">desired height of the printed image, in dots. Passing -1 will preserve original height.</param>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.INetworkDiscoverer">
+            <summary>
+            A class used to discover printers on an IP Network.<br></br>
+            <b>Note:</b> There are no cancel discovery methods.  Be carefull when using these to properly dispose of discoverer objects if navigating prior to finishing discovery.
+            </summary>
+            <example>
+            <code>
+            using LinkOS.Plugin;
+            using LinkOS.Plugin.Abstractions;
+            
+            private void StartNetworkDiscovery()
+            {
+                IDiscoveryEventHandler handler = DiscoveryHandlerFactory.Current.GetInstance();
+                handler.OnDiscoveryError += DiscoveryHandler_OnDiscoveryError;
+                handler.OnDiscoveryFinished += DiscoveryHandler_OnDiscoveryFinished;
+                handler.OnFoundPrinter += DiscoveryHandler_OnFoundPrinter;
+                NetworkDiscoverer.Current.LocalBroadcast(handler);
+            }
+            private void OnFoundPrinter(IDiscoveryHandler handler, IDiscoveredPrinter discoveredPrinter)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    printerList.Add(discoveredPrinter);
+                });
+            }
+            private void OnDiscoveryError(IDiscoveryHandler handler, string message)
+            {
+                System.Diagnostics.Debug.WriteLine("Discovery Error: " + message);
+            }
+            private void OnDiscoveryFinished(IDiscoveryHandler handler, string message)
+            {
+                System.Diagnostics.Debug.WriteLine("Discovery Compete");
+            }
+            </code></example>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.INetworkDiscoverer.FindPrinters(LinkOS.Plugin.Abstractions.IDiscoveryHandler)">
+            <summary>
+            This method will search the network using a combination of discovery methods to find printers on the network. This is a convenience method that can be used as an alternative to the other discovery methods (e.g. multicast) 
+            This method will invoke the DiscoveryHandler.OnFoundPrinter event for each printer that is found during discovery.  DiscoveryHandler.OnDiscoveryFinished will be invoked when the discovery is finished and DiscoveryHandler.OnDiscoveryError will be invoked when any errors are encountered during discovery.
+            When DiscoveryHandler.OnDiscoveryError is invoked, the discovery will be canceled and DiscoveryHandler.OnDiscoveryFinished will not be invoked.
+            If a printer responds to the discovery request more than once, the DiscoveryHandler.OnFoundPrinter event will only be invoked on the first occurrence.
+            </summary>
+            <param name="discoveryHandler">a DiscoveryHandler instance that is used to handle discovery events (e.g. found a printer, errors, discovery finished).</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.INetworkDiscoverer.FindPrinters(LinkOS.Plugin.Abstractions.IDiscoveryHandler,System.String[],System.Int32)">
+            <summary>
+            Sends a discovery request to the list of printer DNS names or IPs in printersToFind. This method will invoke the DiscoveryHandler.OnFoundPrinter method for each printer that is found during discovery. DiscoveryHandler.OnDiscoveryFinished will be invoked when the discovery is finished and DiscoveryHandler.OnDiscoveryError will be invoked when any errors are encountered during discovery. 
+            If a printer responds to the discovery request more than once, the DiscoveryHandler.OnFoundPrinter event will only be invoked on the first occurrence.
+            </summary>
+            <param name="discoveryHandler">a DiscoveryHandler instance that is used to handle discovery events (e.g. found a printer, errors, discovery finished).</param>
+            <param name="printersToFind">A list of IP addresses or DNS names for the printers to be discovered.</param>
+            <param name="waitForResponsesTimeout">time to wait, in milliseconds, before determining that there are no more discovery responses.</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.INetworkDiscoverer.SubnetSearch(LinkOS.Plugin.Abstractions.IDiscoveryHandler,System.String,System.Int32)">
+            <summary>
+            Sends a discovery packet to the IPs specified in the subnetRange. This method will wait up to waitForResponsesTimeout milliseconds determining that there are no more discovery responses. Subnet searches are defined by the first three subnet octets, followed by a range, such as 192.168.2. This method accepts IP addresses of the form, assuming a subnet of 192.168.2:
+            192.168.2.254 (will send a discovery packet to 192.168.2.254)
+            192.168.2.* (will send a discovery packet for the range 192.168.2.1 - 192.168.2.254)
+            192.168.2.8-* (will send a discovery packet for the range 192.168.2.8 - 192.168.2.254)
+            192.168.2.37-42 (will send a discovery packet for the range 192.168.2.37 - 192.168.2.42)
+            This method will invoke the DiscoveryHandler.OnFoundPrinter method for each printer that is found during discovery. DiscoveryHandler.OnDiscoveryFinished will be invoked when the discovery is finished and DiscoveryHandler.OnDiscoveryError will be invoked when any errors are encountered during discovery. 
+            If a printer responds to the discovery request more than once, the DiscoveryHandler.OnFoundPrinter event will only be invoked on the first occurrence.
+            </summary>
+            <param name="discoveryHandler">a DiscoveryHandler instance that is used to handle discovery events (e.g. found a printer, errors, discovery finished).</param>
+            <param name="subnetRange">the subnet search range</param>
+            <param name="waitForResponsesTimeout">time to wait, in milliseconds, before determining that there are no more discovery responses.</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.INetworkDiscoverer.LocalBroadcast(LinkOS.Plugin.Abstractions.IDiscoveryHandler,System.Int32)">
+            <summary>
+            Sends a local broadcast packet. This method will wait up to waitForResponsesTimeout milliseconds determining that there are no more discovery responses. 
+            This method will invoke the DiscoveryHandler.OnFoundPrinter event for each printer that is found during discovery.  DiscoveryHandler.OnDiscoveryFinished will be invoked when the discovery is finished and DiscoveryHandler.OnDiscoveryError will be invoked when any errors are encountered during discovery.
+            When DiscoveryHandler.OnDiscoveryError is invoked, the discovery will be canceled and DiscoveryHandler.OnDiscoveryFinished will not be invoked.
+            If a printer responds to the discovery request more than once, the DiscoveryHandler.OnFoundPrinter event will only be invoked on the first occurrence.
+            </summary>
+            <param name="discoveryHandler">a DiscoveryHandler instance that is used to handle discovery events (e.g. found a printer, errors, discovery finished).</param>
+            <param name="waitForResponsesTimeout">time to wait, in milliseconds, before determining that there are no more discovery responses.</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.INetworkDiscoverer.DirectedBroadcast(LinkOS.Plugin.Abstractions.IDiscoveryHandler,System.String,System.Int32)">
+            <summary>
+            Sends a directed broadcast discovery packet to the subnet specified by ipAddress. This method will wait up to waitForResponsesTimeout milliseconds determining that there are no more discovery responses. Directed broadcasts are defined by the first three subnet octets, followed by 255, such as 192.168.2.255. This method accepts IP addresses of the form, assuming a subnet of 192.168.2:
+            192.168.2.255
+            192.168.2.1 (last octet will be replaced with 255)
+            192.168.2 (will append 255 for the last octet)
+            192.168.2. (will append 255 for the last octet)
+            This method will invoke the DiscoveryHandler.OnFoundPrinter method for each printer that is found during discovery. DiscoveryHandler.OnDiscoveryFinished will be invoked when the discovery is finished and DiscoveryHandler.OnDiscoveryError will be invoked when any errors are encountered during discovery. 
+            If a printer responds to the discovery request more than once, the DiscoveryHandler.OnFoundPrinter event will only be invoked on the first occurrence.
+            </summary>
+            <param name="discoveryHandler">a DiscoveryHandler instance that is used to handle discovery events (e.g. found a printer, errors, discovery finished).</param>
+            <param name="ipAddress">the IP address of the subnet.</param>
+            <param name="waitForResponsesTimeout">time to wait, in milliseconds, before determining that there are no more discovery responses.</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.INetworkDiscoverer.Multicast(LinkOS.Plugin.Abstractions.IDiscoveryHandler,System.Int32,System.Object,System.Int32)">
+            <summary>
+            Sends a multicast discovery packet. This method will wait up to waitForResponsesTimeout milliseconds determining that there are no more discovery responses.
+            If a printer responds to the discovery request more than once, the DiscoveryHandler.OnFoundPrinter event will only be invoked on the first occurrence.
+            </summary>
+            <param name="discoveryHandler">a DiscoveryHandler instance that is used to handle discovery events (e.g. found a printer, errors, discovery finished).</param>
+            <param name="hops">number of hops.</param>
+            <param name="androidContext">the Android context, set to null in iOS</param>
+            <param name="waitForResponsesTimeout">time to wait, in milliseconds, before determining that there are no more discovery responses.</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:LinkOS.Plugin.Abstractions.IPrinterStatus" -->
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.IsHeadCold">
+            <summary>
+            true if the head is cold.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.IsHeadOpen">
+            <summary>
+            true if the head is open.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.IsHeadTooHot">
+            <summary>
+            true if the head is too hot.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.IsPaperOut">
+            <summary>
+            true if the paper is out.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.IsPartialFormatInProgress">
+            <summary>
+            true if there is a partial format in progress.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.IsPaused">
+            <summary>
+            true if the printer is paused.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.IsReadyToPrint">
+            <summary>
+            true if the printer reports back that it is ready to print
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.IsReceiveBufferFull">
+            <summary>
+            true if the receive buffer is full.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.IsRibbonOut">
+            <summary>
+            true if the ribbon is out.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.LabelLengthInDots">
+            <summary>
+            The length of the label in dots.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.LabelsRemainingInBatch">
+            <summary>
+            The number of labels remaining in the batch.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.NumberOfFormatsInReceiveBuffer">
+            <summary>
+            The number of formats currently in the receive buffer of the printer.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.ZplPrintMode">
+            <summary>
+            The print mode.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IPrinterStatus.Status">
+            <summary>
+            A single csv style list of the current statuses
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IPrinterUtil">
+            <summary>
+            Numerous utilities to simplify printer operations
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IPrinterUtil.SendContents(System.String,System.String)">
+            <summary>
+            Send contents of data directly to the device specified via connectionString using UTF-8 encoding.
+            See ConnectionBuilder for the format of connectionString.
+            </summary>
+            <param name="connectionString">The connection string.</param>
+            <param name="data">Data to send to the printer.</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IPrinterUtil.StoreFile(System.String,System.String,System.String)">
+            <summary>
+            Stores the file on the printer at the specified location and name using any required file wrappers.
+            See ConnectionBuilder for the format of connectionString.
+            This function only works on Link-OS printers. For ZebraLink printers, use the SendContents() function.
+            </summary>
+            <param name="connectionString">The connection string.</param>
+            <param name="filePath">The path of the file to store.</param>
+            <param name="remoteName">The path on the printer.</param>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IUsbDiscoverer">
+            <summary>
+            Discovers Zebra printers connected to an Android™ device via USB Host
+            </summary>
+                /// <example>
+            <b>Note:</b>Below are 3 methods for doing discovery.  They are platform specific.  Do not attempt to implement all 3 methods.
+            <code>
+            using LinkOS.Plugin;
+            using LinkOS.Plugin.Abstractions;
+            
+            private void StartUSBDiscovery()
+            {
+                IDiscoveryEventHandler handler = DiscoveryHandlerFactory.Current.GetInstance();
+                handler.OnDiscoveryError += DiscoveryHandler_OnDiscoveryError;
+                handler.OnDiscoveryFinished += DiscoveryHandler_OnDiscoveryFinished;
+                handler.OnFoundPrinter += DiscoveryHandler_OnFoundPrinter;
+            
+                // For Android 
+                UsbDiscoverer.Current.FindPrinters(Xamarin.Forms.Forms.Context, handler);
+                // iOS products are not capable of acting as a USB host.  No implemetation possible.
+                throw new NotImplementedException;
+                // For Forms apps: implement the previous two methods in OS code projects (PrinterDiscoveryImplementation.cs)
+                try
+                {
+                    DependencyService.Get&lt;IPrinterDiscovery&gt;().FindUSBPrinters(handler);
+                }
+                catch (NotImplementedException)
+                {
+                	System.Diagnostics.Debug.WriteLine("iOS products do not have access to USB peripherals");
+                }
+            }
+            private void OnFoundPrinter(IDiscoveryHandler handler, IDiscoveredPrinter discoveredPrinter)
+            {
+                Device.BeginInvokeOnMainThread(() => {
+                    printerList.Add(discoveredPrinter);
+                });
+            }
+            private void OnDiscoveryError(IDiscoveryHandler handler, string message)
+            {
+                System.Diagnostics.Debug.WriteLine("Discovery Error: " + message);
+            }
+            private void OnDiscoveryFinished(IDiscoveryHandler handler, string message)
+            {
+                System.Diagnostics.Debug.WriteLine("Discovery Compete");
+            }
+            
+            
+            // Make sure the user has given permission to talk to USB device.
+            public delegate void GotPrinterHandler(IDiscoveredPrinter discoveredPrinter);
+            public GotPrinterHandler OnGotPrinter;
+            private void OnPrinterSelectedFromList(object sender, IDiscoveredPrinter discoveredPrinter)
+            {
+                if (! ((IDiscoveredPrinterUsb)discoveredPrinter).HasPermissionToCommunicate)
+                {
+                    ((IDiscoveredPrinterUsb)discoveredPrinter).RequestPermission(Xamarin.Forms.Forms.Context);
+                }
+                if (OnGotPrinter != null)
+                    OnGotPrinter(discoveredPrinter);
+            }
+            </code></example>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IUsbDiscoverer.FindPrinters(System.Object,LinkOS.Plugin.Abstractions.IDiscoveryHandler)">
+            <summary>
+            Initiate discovery
+            Will throw a System.NotImplementedException in iOS
+            </summary>
+            <param name="androidContext">The android application context. set to null for iOS</param>
+            <param name="handler">a DiscoveryHandler instance that is used to handle discovery events (e.g. found a printer, errors, discovery finished).</param>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IUsbDiscoverer.IsZebraPrinter(System.Object)">
+            <summary>
+            Checks if a USB device is a Zebra printer
+            Will throw a System.NotImplementedException in iOS
+            </summary>
+            <param name="androidUSBDevice">a Android.Hardware.Usb.UsbDevice</param>
+            <returns>true if the USB device is a Zebra device</returns>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IZebraPrinter">
+            <summary>
+            An interface used to obtain various properties of a Zebra printer.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IZebraPrinter.Connection">
+            <summary>
+            Get the printer's connection.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IZebraPrinter.CurrentStatus">
+            <summary>
+            Get a new instance of PrinterStatus that can be used to determine the status of a printer.
+            On Zebralink Mobile Printers, this function only works if the printer is not currently printing or processing other data, otherwise returns a MalformedStatusResponse exception.  
+            Link-OS and non-Mobile printers can be checked for status while prinintg.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Abstractions.IZebraPrinter.PrinterControlLanguage">
+            <summary>
+            Get the printer control language (e.g. ZPL or CPCL) of the printer.
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.PrinterLanguage">
+            <summary>
+            Enumeration of the various printer control languages supported by Zebra Printers.
+            </summary>
+        </member>
+        <member name="F:LinkOS.Plugin.Abstractions.PrinterLanguage.CPCL">
+            <summary>
+            Printer control language CPCL
+            </summary>
+        </member>
+        <member name="F:LinkOS.Plugin.Abstractions.PrinterLanguage.LINE_PRINT">
+            <summary>
+            Printer control language line_print mode.
+            </summary>
+        </member>
+        <member name="F:LinkOS.Plugin.Abstractions.PrinterLanguage.ZPL">
+            <summary>
+            Printer control language ZPL
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.Abstractions.IZebraPrinterFactory">
+            <summary>
+            A factory used to acquire an instance of a ZebraPrinter.
+            </summary>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IZebraPrinterFactory.GetInstance(LinkOS.Plugin.Abstractions.IConnection)">
+            <summary>
+            Factory method to create the correct ZebraPrinter concrete class based on the printer's control language. If the Set-Get-Do value, appl.name, starts with one of the following, the printer is determined to be a CPCL printer. Otherwise it is considered to be a ZPL printer
+            SH, H8, C
+            </summary>
+            <param name="connection">an open connection to a printer</param>
+            <returns>an instance of a ZebraPrinter</returns>
+        </member>
+        <member name="M:LinkOS.Plugin.Abstractions.IZebraPrinterFactory.GetInstance(LinkOS.Plugin.Abstractions.PrinterLanguage,LinkOS.Plugin.Abstractions.IConnection)">
+            <summary>
+            Factory method to create the correct ZebraPrinter concrete class based on the provided printer control language.
+            </summary>
+            <param name="language">the language of the printer instance to be created</param>
+            <param name="connection">an open connection to a printer</param>
+            <returns>an instance of a ZebraPrinter</returns>
+        </member>
+    </members>
+</doc>

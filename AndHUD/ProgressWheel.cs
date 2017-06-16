@@ -6,7 +6,7 @@ using Android.Content;
 
 namespace AndroidHUD
 {
-	public class ProgressWheel : View
+	public class ProgressWheel : AndHUD.ProgressWheel
 	{
 		public ProgressWheel(Context context) 
 			: this(context, null, 0)

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/FindPrinters"
+        android:title="@string/FindPrinters" />
+  <item android:id="@+id/LoadDataFile"
+      android:title="@string/LoadDataFile" />
+  <!--<item android:id="@+id/RowInfo"
+        android:title="@string/RowInfo" />-->
+  <!--<item android:id="@+id/SearchLocation"
+        android:title="@string/SearchLocation" />-->
+  <item android:id="@+id/About"
+        android:title="@string/About" />
+  <item android:id="@+id/Quit"
+        android:title="@string/Quit" />
+</menu>

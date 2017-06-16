@@ -1,0 +1,230 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LinkOS.Plugin</name>
+    </assembly>
+    <members>
+        <member name="T:LinkOS.Plugin.BluetoothDiscoverer">
+            <summary>
+            A class that discovers Bluetooth® devices.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.BluetoothDiscoverer.Current">
+            <summary>
+            Current IBluetoothDiscoverer to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.Connection">
+            <summary>
+            A connection to a device.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.Connection.Current">
+            <summary>
+            Current IConnection to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.ConnectionBuilder">
+            <summary>
+            Builds a Connection from a description string. The description string is used to specify a connection to a specific device over TCP or Bluetooth.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.ConnectionBuilder.Current">
+            <summary>
+            Current IConnectionBuilder to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.DiscoveredPrinter">
+            <summary>
+            Container holding information about a discovered printer.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.DiscoveredPrinter.Current">
+            <summary>
+            Current IDiscoveredPrinter to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.DiscoveryHandler">
+            <summary>
+             Class to provide printer discovery events
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.DiscoveryHandler.DiscoveryErrorHandler">
+            <summary>
+            This method is invoked when there is an error during discovery. The discovery will be cancelled when this method is invoked. discoveryFinished() will not be called if this method is invoked.
+            </summary>
+            <param name="sender">the specific IDiscoveryHandler initiating this event</param>
+            <param name="message">the error message</param>
+        </member>
+        <member name="T:LinkOS.Plugin.DiscoveryHandler.DiscoveryFinishedHandler">
+            <summary>
+            This method is invoked when discovery is finished.
+            </summary>
+            <param name="sender">the specific IDiscoveryHandler initiating this event</param>
+        </member>
+        <member name="T:LinkOS.Plugin.DiscoveryHandler.FoundPrinterHandler">
+            <summary>
+            This method is invoked when a printer has been discovered. This method will be invoked for each printer that is found.
+            </summary>
+            <param name="sender">the specific IDiscoveryHandler initiating this event</param>
+            <param name="discoveredPrinter">a discovered printer.</param>
+        </member>
+        <member name="E:LinkOS.Plugin.DiscoveryHandler.OnDiscoveryError">
+            <summary>
+            This event is invoked when there is an error during discovery.
+            </summary>
+        </member>
+        <member name="E:LinkOS.Plugin.DiscoveryHandler.OnDiscoveryFinished">
+            <summary>
+            This event is invoked when discovery is finished.
+            </summary>
+        </member>
+        <member name="E:LinkOS.Plugin.DiscoveryHandler.OnFoundPrinter">
+            <summary>
+            This event is invoked when a printer has been discovered.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.DiscoveryHandler.Current">
+            <summary>
+            Current DiscoveryHandler to use
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.DiscoveryHandlerFactory.Current">
+            <summary>
+            Current IZebraPrinterFactory to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.FieldDescription">
+            <summary>
+            This class is used to describe format variable fields.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.FieldDescription.FieldName">
+            <summary>
+            In CPCL, this field is always null.
+            In ZPL, this field will correspond to the optional name parameter of the ^FN command, or null if the parameter is not present
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.FieldDescription.FieldNumber">
+            <summary>
+            In CPCL, this number will be the number of the variable field in the format.
+            In ZPL, this number will be the field number specified in the format
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.NetworkDiscoverer">
+            <summary>
+            A class used to discover printers on an IP Network.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.NetworkDiscoverer.Current">
+            <summary>
+            Current INetworkDiscoverer to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.PrinterStatus">
+            <summary>
+            A class used to obtain the status of a Zebra printer.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.PrinterStatus.Current">
+            <summary>
+            Current IPrinterStatus to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.PrinterUtil">
+            <summary>
+            Numerous utilities to simplify printer operations
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.PrinterUtil.Current">
+            <summary>
+            Current IPrinterUtil to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.UsbDiscoverer">
+            <summary>
+            Discovers Zebra printers connected to an Android™ device via USB Host
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.UsbDiscoverer.Current">
+            <summary>
+            Current IUsbDiscoverer to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.ZebraPrinter">
+            <summary>
+            A genaric class used to obtain various properties of a Zebra printer.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.ZebraPrinter.Current">
+            <summary>
+            Current IZebraPrinter to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.ZebraPrinterFactory">
+            <summary>
+            A factory used to acquire an instance of a ZebraPrinter.
+            </summary>
+        </member>
+        <member name="P:LinkOS.Plugin.ZebraPrinterFactory.Current">
+            <summary>
+            Current IZebraPrinterFactory to use
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.BluetoothDiscovererImplementation">
+            <summary>
+            The implementation class that discovers Bluetooth® devices.
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.ConnectionBuilderImplementation">
+            <summary>
+            The OS specific implementation of IConnectionBuilder
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.ConnectionImplementation">
+            <summary>
+            The OS specific implementation of an IConnection
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.DiscoveredPrinterBluetoothImplementation">
+            <summary>
+            An OS specific instance of IDiscoveredPrinter that is returned when performing a bluetooth discovery.
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.DiscoveredPrinterImplementation">
+            <summary>
+            The OS specific implementation of an IDiscoveredPrinter
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.DiscoveredPrinterNetworkImplementation">
+            <summary>
+            An OS specific instance of IDiscoveredPrinter that is returned when performing a network discovery.
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.NetworkDiscovererImplementation">
+            <summary>
+            The OS specific implementation of an INetworkDiscoverer
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.PrinterStatusImplementation">
+            <summary>
+            The OS specific implementation of an IPrinterStatus
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.UsbDiscovererImplementation">
+            <summary>
+            The OS specific implementation of an IUsbDiscoverer
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.ZebraPrinterFactoryImplementation">
+            <summary>
+            The OS specific implementation of an IZebraPrinterFactory
+            </summary>
+        </member>
+        <member name="T:LinkOS.Plugin.ZebraPrinterImplementation">
+            <summary>
+            The OS specific implementation of an IZebraPrinter
+            </summary>
+        </member>
+    </members>
+</doc>

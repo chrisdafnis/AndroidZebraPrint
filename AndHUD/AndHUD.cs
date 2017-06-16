@@ -39,47 +39,47 @@ namespace AndroidHUD
 		readonly object dialogLock = new object();
 
 
-		public void Show (Context context, string status = null, int progress = -1, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, bool centered = true, Action cancelCallback = null)
+		public void Show(Context context, string status = null, int progress = -1, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, bool centered = true, Action cancelCallback = null)
 		{
 			if (progress >= 0)
-				showProgress (context, progress, status, maskType, timeout, clickCallback, cancelCallback);
+				ShowProgress (context, progress, status, maskType, timeout, clickCallback, cancelCallback);
 			else
-				showStatus (context, true, status, maskType, timeout, clickCallback, centered, cancelCallback);
+				ShowStatus(context, true, status, maskType, timeout, clickCallback, centered, cancelCallback);
 		}
 
 		public void ShowSuccess(Context context, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
 		{
-			showImage (context, context.Resources.GetDrawable (Resource.Drawable.ic_successstatus), status, maskType, timeout, clickCallback, cancelCallback);
+			ShowImage(context, context.Resources.GetDrawable (Resource.Drawable.ic_successstatus), status, maskType, timeout, clickCallback, cancelCallback);
 		}
 
 		public void ShowError(Context context, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
 		{
-			showImage (context, context.Resources.GetDrawable (Resource.Drawable.ic_errorstatus), status, maskType, timeout, clickCallback, cancelCallback);
+			ShowImage(context, context.Resources.GetDrawable (Resource.Drawable.ic_errorstatus), status, maskType, timeout, clickCallback, cancelCallback);
 		}
 
 		public void ShowSuccessWithStatus(Context context, string status, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
 		{
-			showImage (context, context.Resources.GetDrawable (Resource.Drawable.ic_successstatus), status, maskType, timeout, clickCallback, cancelCallback);
+			ShowImage(context, context.Resources.GetDrawable (Resource.Drawable.ic_successstatus), status, maskType, timeout, clickCallback, cancelCallback);
 		}
 
 		public void ShowErrorWithStatus(Context context, string status, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
 		{
-			showImage (context, context.Resources.GetDrawable (Resource.Drawable.ic_errorstatus), status, maskType, timeout, clickCallback, cancelCallback);
+			ShowImage(context, context.Resources.GetDrawable (Resource.Drawable.ic_errorstatus), status, maskType, timeout, clickCallback, cancelCallback);
 		}
 
 		public void ShowImage(Context context, int drawableResourceId, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
 		{
-			showImage (context, context.Resources.GetDrawable(drawableResourceId), status, maskType, timeout, clickCallback, cancelCallback);
+			ShowImage(context, context.Resources.GetDrawable(drawableResourceId), status, maskType, timeout, clickCallback, cancelCallback);
 		}
 
 		public void ShowImage(Context context, Android.Graphics.Drawables.Drawable drawable, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
 		{
-			showImage (context, drawable, status, maskType, timeout, clickCallback, cancelCallback);
+			ShowImage(context, drawable, status, maskType, timeout, clickCallback, cancelCallback);
 		}
 
 		public void ShowToast(Context context, string status, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, bool centered = true, Action clickCallback = null, Action cancelCallback = null)
 		{
-			showStatus (context, false, status, maskType, timeout, clickCallback, centered, cancelCallback);
+			ShowStatus(context, false, status, maskType, timeout, clickCallback, centered, cancelCallback);
 		}
 
 		public void Dismiss(Context context = null)
@@ -87,7 +87,7 @@ namespace AndroidHUD
 			DismissCurrent (context);
 		}
 
-		void showStatus (Context context, bool spinner, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, bool centered = true, Action cancelCallback = null)
+		void ShowStatus (Context context, bool spinner, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, bool centered = true, Action cancelCallback = null)
 		{
 			if (timeout == null)
 				timeout = TimeSpan.Zero;
@@ -170,7 +170,7 @@ namespace AndroidHUD
 			return px;
 		}
 
-		void showProgress(Context context, int progress, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
+		void ShowProgress(Context context, int progress, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
 		{
 			if (!timeout.HasValue || timeout == null)
 				timeout = TimeSpan.Zero;
@@ -231,7 +231,7 @@ namespace AndroidHUD
 		}
 
 
-		void showImage(Context context, Android.Graphics.Drawables.Drawable image, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
+		void ShowImage(Context context, Android.Graphics.Drawables.Drawable image, string status = null, MaskType maskType = MaskType.Black, TimeSpan? timeout = null, Action clickCallback = null, Action cancelCallback = null)
 		{
 			if (timeout == null)
 				timeout = TimeSpan.Zero;
@@ -354,27 +354,23 @@ namespace AndroidHUD
 					//Next let's try and get the Activity from the CurrentDialog
 					if (CurrentDialog != null && CurrentDialog.Window != null && CurrentDialog.Window.Context != null)
 					{
-						var activity = CurrentDialog.Window.Context as Activity;
-
-						if (activity != null)
-						{
-							activity.RunOnUiThread (actionDismiss);
-							return;
-						}
-					}
+                        if (CurrentDialog.Window.Context is Activity activity)
+                        {
+                            activity.RunOnUiThread(actionDismiss);
+                            return;
+                        }
+                    }
 				
 					//Finally if all else fails, let's see if someone passed in a context to dismiss and it
 					// happens to also be an Activity
 					if (context != null)
 					{
-						var activity = context as Activity;
-
-						if (activity != null)
-						{
-							activity.RunOnUiThread (actionDismiss);
-							return;
-						}
-					}
+                        if (context is Activity activity)
+                        {
+                            activity.RunOnUiThread(actionDismiss);
+                            return;
+                        }
+                    }
 
 				}
 			}

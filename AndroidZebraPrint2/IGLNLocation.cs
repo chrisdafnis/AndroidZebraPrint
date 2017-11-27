@@ -11,6 +11,7 @@ namespace DakotaIntegratedSolutions
         string Room { get; set; }
         string Code { get; set; }
         string GLN { get; set; }
+        string VariableText { get; set; }
         DateTime Date { get; set; }
         string ToString();
         string Value();

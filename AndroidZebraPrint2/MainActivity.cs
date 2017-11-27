@@ -18,6 +18,8 @@ using System.Xml.Linq;
 using Zebra.Sdk.Comm;
 using AndroidZebraPrint2;
 using AndroidHUD;
+using System.Linq;
+using static DakotaIntegratedSolutions.FileUtilImplementation;
 
 //using Com.Mitac.Cell.Device;
 
@@ -325,40 +327,83 @@ namespace DakotaIntegratedSolutions
             try
             {
                 AndHUD.Shared.Show(this, "Loading...", -1, MaskType.Black);
-                Func<string> function = new Func<string>(() => LoadLocations(filename));
-                res = await Task.Factory.StartNew<string>(function);
+                string xml = LoadLocations(filename);
+                if (xml.Length > 0)
+                {
+                    Func<string> function = new Func<string>(() => xml);
+                    res = await Task.Factory.StartNew<string>(function);
+                }
+                else
+                {
+                    AndHUD.Shared.Dismiss(this);
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                    dialogBuilder.SetTitle("File Error");
+                    dialogBuilder.SetMessage("There was a problem loading this file, it is not in the required format.");
+                    dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
+                    dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate { });
+                    dialogBuilder.Show();
+                    throw new Exception();
+                }
                 AndHUD.Shared.Dismiss(this);
             }
             catch (Exception ex)
             {//call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
                 fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+                return;
             }
 
             XDocument xDoc = XDocument.Parse((string)res);
             if (xDoc != null)
             {
+                CSVFileFormat fileType = fileUtility.FileFormat;
                 locationList = new System.Collections.ObjectModel.ObservableCollection<IGLNLocation>();
                 XName xName = XName.Get("GLNLocation");
-
-                foreach (XElement xElem in xDoc.Descendants("GLNLocation"))
+                if (fileType == CSVFileFormat.PLYMOUTH)
                 {
-                    IGLNLocation location = new GLNLocation()
+                    foreach (XElement xElem in xDoc.Descendants("GLNLocation"))
                     {
-                        Region = xElem.Element("Region").Value,
-                        Site = xElem.Element("Site").Value,
-                        Building = xElem.Element("Building").Value,
-                        Floor = xElem.Element("Floor").Value,
-                        Room = xElem.Element("Room").Value,
-                        Code = xElem.Element("Code").Value,
-                        GLN = xElem.Element("GLN").Value,
-                        Date = Convert.ToDateTime(xElem.Element("GLNCreationDate").Value),
-                        Printed = Convert.ToBoolean(xElem.Element("Printed").Value)
-                    };
-                    if (!locationList.Contains(location))
-                    {
-                        locationList.Add(location);
+                        IGLNLocation location = new GLNLocation()
+                        {
+                            Region = xElem.Element("Region").Value,
+                            Site = xElem.Element("Site").Value,
+                            Building = xElem.Element("Building").Value,
+                            Floor = xElem.Element("Floor").Value,
+                            Room = xElem.Element("Room").Value,
+                            Code = xElem.Element("Code").Value,
+                            GLN = xElem.Element("GLN").Value,
+                            Date = Convert.ToDateTime(xElem.Element("GLNCreationDate").Value),
+                            VariableText = xElem.Element("FreeText").Value,
+                            Printed = Convert.ToBoolean(xElem.Element("Printed").Value)
+                        };
+                        if (!locationList.Contains(location))
+                        {
+                            locationList.Add(location);
+                        }
                     }
                 }
+                else
+                {
+                    foreach (XElement xElem in xDoc.Descendants("GLNLocation"))
+                    {
+                        IGLNLocation location = new GLNLocation()
+                        {
+                            Region = xElem.Element("Region").Value,
+                            Site = xElem.Element("Site").Value,
+                            Building = xElem.Element("Building").Value,
+                            Floor = xElem.Element("Floor").Value,
+                            Room = xElem.Element("Room").Value,
+                            Code = xElem.Element("Code").Value,
+                            GLN = xElem.Element("GLN").Value,
+                            Date = Convert.ToDateTime(xElem.Element("GLNCreationDate").Value),
+                            Printed = Convert.ToBoolean(xElem.Element("Printed").Value)
+                        };
+                        if (!locationList.Contains(location))
+                        {
+                            locationList.Add(location);
+                        }
+                    }
+                }
+
                 IGLNLocation[] locations = new IGLNLocation[locationList.Count];
                 try
                 {
@@ -398,7 +443,11 @@ namespace DakotaIntegratedSolutions
         private string LoadLocations(string filename)
         {
             XDocument xDoc = (XDocument)fileUtility.LoadGLNFile(filename);
-            string returnValue = String.Concat(@"<?xml version=""1.0"" encoding=""utf-8"" ?>", xDoc.ToString());
+            string returnValue = string.Empty;
+            if (xDoc != null)
+            {
+                returnValue = String.Concat(@"<?xml version=""1.0"" encoding=""utf-8"" ?>", xDoc.ToString());
+            }
             return returnValue;
         }
 
@@ -490,6 +539,22 @@ namespace DakotaIntegratedSolutions
                     // Royal Cornwall want the room code above the barcode
                     zpl +=
                         @"^FT591,340^A0I,54,52^FD" + "Room Number:" + locationList[currentSelected].Code + "^FS" + "\r\n" +
+                        @"^BY3,3,230^FT508,89^BCI,,N,N^FD>;>8414" + locationList[currentSelected].GLN + "^FS" + "\r\n" +
+                        @"^FT441,41^A0I,34,33^FB276,1,0,C^FH\^FD(414)" + locationList[currentSelected].GLN + "\r\n";
+                    //@"^FT591,360^A0I,40,39^FD" + "Room Number:" + locationList[currentSelected].Code + "^FS" + "\r\n" +
+                    //@"^BY3,3,230^FT508,109^BCI,,N,N^FD>;>8414" + locationList[currentSelected].GLN + "^FS" + "\r\n" +
+                    //@"^FT441,71^A0I,34,33^FB276,1,0,C^FH\^FD(414)" + locationList[currentSelected].GLN + "\r\n";
+                }
+                else if (locationList[currentSelected].Region == "Plymouth Hospitals NHS Trust")
+                {
+                    locationList[currentSelected].VariableText = locationList[currentSelected].VariableText.Substring(0, Math.Min(28, locationList[currentSelected].VariableText.Length));
+                    while (locationList[currentSelected].VariableText.Length < 28)
+                    {
+                        locationList[currentSelected].VariableText = " " + locationList[currentSelected].VariableText + " ";
+                    }
+                    // Plymouth want variable text above the barcode
+                    zpl +=
+                        @"^FT581,340^A0I,54,52^FD" + locationList[currentSelected].VariableText + "^FS" + "\r\n" +
                         @"^BY3,3,230^FT508,89^BCI,,N,N^FD>;>8414" + locationList[currentSelected].GLN + "^FS" + "\r\n" +
                         @"^FT441,41^A0I,34,33^FB276,1,0,C^FH\^FD(414)" + locationList[currentSelected].GLN + "\r\n";
                     //@"^FT591,360^A0I,40,39^FD" + "Room Number:" + locationList[currentSelected].Code + "^FS" + "\r\n" +

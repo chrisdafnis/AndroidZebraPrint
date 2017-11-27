@@ -15,6 +15,7 @@ using System.Data;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml;
 using System.Diagnostics;
+using Android.App;
 
 namespace DakotaIntegratedSolutions
 {
@@ -24,6 +25,7 @@ namespace DakotaIntegratedSolutions
         public enum FILE_EXTENSIONS { csv = 0, xlsx };
         public DiscoveredPrinterBluetooth SavedPrinter { get { return savedPrinter; } set { savedPrinter = value; } }
         public enum CSVFileFormat { PLYMOUTH=0, CORNWALL, NORTHTEES, UNKNOWN };
+        public CSVFileFormat FileFormat { get; set; }
 
         public void SaveXMLSettings(object printer)
         {
@@ -97,7 +99,7 @@ namespace DakotaIntegratedSolutions
             {
                 string documentsPath = "/mnt/ext_sdcard";
 #if DEBUG
-                documentsPath = "/mnt/sdcard";
+                //documentsPath = "/mnt/sdcard";
 #else
                 documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 #endif
@@ -110,29 +112,51 @@ namespace DakotaIntegratedSolutions
             XDocument xDoc = null;
             try
             {
-                CSVFileFormat fileType = CSVFileFormat.UNKNOWN;
+                FileFormat = CSVFileFormat.UNKNOWN;
                 string[] csv = File.ReadAllLines(filename);
                 // extract blank rows (if any)
                 csv = csv.Where(x => !string.IsNullOrEmpty(x)).ToArray();
                 // remove header (if present)
                 var header = new Regex("GLN Creation Date");
                 csv = csv.Where(x => !header.IsMatch(x)).ToArray();
+                int fieldCount = Regex.Split(csv[0], ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)").Count<string>();
 
                 if (csv[0].Contains("Plymouth Hospitals NHS Trust"))
                 {
-                    fileType = CSVFileFormat.PLYMOUTH;
+                    if (fieldCount != 10)
+                    {
+                        throw new ApplicationException("File error: the file is not in the required format");
+                    }
+                    else
+                    {
+                        FileFormat = CSVFileFormat.PLYMOUTH;
+                    }
                 }
                 else if (csv[0].Contains("ROYAL CORNWALL HOSPITALS NHS TRUST"))
                 {
-                    fileType = CSVFileFormat.CORNWALL;
+                    if (fieldCount != 9)
+                    {
+                        throw new ApplicationException("File error: the file is not in the required format");
+                    }
+                    else
+                    {
+                        FileFormat = CSVFileFormat.CORNWALL;
+                    }
                 }
                 else if (csv[0].Contains("Nth Tees & Hartlepool NHSTrust"))
                 {
-                    fileType = CSVFileFormat.NORTHTEES;
+                    if (fieldCount != 9)
+                    {
+                        throw new ApplicationException("File error: the file is not in the required format");
+                    }
+                    else
+                    {
+                        FileFormat = CSVFileFormat.NORTHTEES;
+                    }
                 }
                 else
                 {
-                    fileType = CSVFileFormat.UNKNOWN;
+                    FileFormat = CSVFileFormat.UNKNOWN;
                 }
 
                 StringBuilder builder = new StringBuilder();
@@ -176,9 +200,8 @@ namespace DakotaIntegratedSolutions
                 writer.Write(builder);
                 writer.Close();
 
-                switch (fileType)
+                switch (FileFormat)
                 {
-                    case CSVFileFormat.PLYMOUTH:
                     case CSVFileFormat.CORNWALL:
                         {
 
@@ -241,12 +264,48 @@ namespace DakotaIntegratedSolutions
                             });
                         }
                         break;
+                    case CSVFileFormat.PLYMOUTH:
+                        {
+                            XElement location = new XElement("Root",
+                                from str in builder.ToString().Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                                let fields = str.Split(',')
+
+                                // Region, Site, Building, Floor, Room, Code, GLN
+                                select new XElement("GLNLocation",
+                                    new XElement("Region", fields[0]),
+                                    new XElement("Site", fields[1]),
+                                    new XElement("Building", fields[2]),
+                                    new XElement("Floor", fields[3]),
+                                    new XElement("Room", fields[4]),
+                                    new XElement("Code", fields[5]),
+                                    new XElement("GLN", fields[6]),
+                                    new XElement("GLNCreationDate", DateTime.Now),
+                                    new XElement("FreeText", fields[8]),
+                                    new XElement("Printed", fields[9])));
+
+                            XmlSchemaSet schemaSet = AddNewXMLSchema();
+                            xDoc = XDocument.Parse(location.ToString());
+                            if (xDoc == null | xDoc.Root == null)
+                            {
+                                throw new ApplicationException("xml error: the referenced stream is not xml.");
+                            }
+
+                            xDoc.Validate(schemaSet, (o, e) =>
+                            {
+                                throw new ApplicationException("xsd validation error: xml file has structural problems");
+                            });
+                        }
+                        break;
                 }
             }
             catch (IndexOutOfRangeException ex)
             {
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
                 LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+            }
+            catch (ApplicationException ex)
+            {
+                xDoc = null;
             }
             return xDoc;
         }
@@ -599,6 +658,38 @@ namespace DakotaIntegratedSolutions
 							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='Room' form='unqualified'></xsd:element>
 							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='Code' form='unqualified'></xsd:element>
 							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='GLN' form='unqualified'></xsd:element>
+							                    <xsd:element minOccurs='0' nillable='true' type='xsd:date' name='GLNCreationDate' form='unqualified'></xsd:element>
+						                    </xsd:sequence>
+					                    </xsd:complexType>
+				                    </xsd:element>
+			                    </xsd:sequence>
+		                    </xsd:complexType>
+	                    </xsd:element>
+                    </xsd:schema>";
+            XmlSchemaSet schemas = new XmlSchemaSet();
+            schemas.Add("http://www.contoso.com/books", XmlReader.Create(new StringReader(xsdMarkup)));
+            return schemas;
+        }
+
+        private XmlSchemaSet AddNewXMLSchema()
+        {
+            string xsdMarkup =
+                @"<?xml version='1.0' encoding='utf-8'?>
+                    <xsd:schema attributeFormDefault='unqualified' elementFormDefault='qualified' targetNamespace='http://www.contoso.com/books' xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+                        <xsd:element nillable='true' name='GLNData'>
+		                    <xsd:complexType>
+			                    <xsd:sequence minOccurs='0'>
+				                    <xsd:element minOccurs='0' maxOccurs='unbounded' nillable='true' name='GLNLocation' form='unqualified'>
+					                    <xsd:complexType>
+						                    <xsd:sequence minOccurs='0'>
+							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='Region' form='unqualified'></xsd:element>
+							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='Site' form='unqualified'></xsd:element>
+							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='Building' form='unqualified'></xsd:element>
+							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='Floor' form='unqualified'></xsd:element>
+							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='Room' form='unqualified'></xsd:element>
+							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='Code' form='unqualified'></xsd:element>
+							                    <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='GLN' form='unqualified'></xsd:element>
+                                                <xsd:element minOccurs='0' nillable='true' type='xsd:string' name='FreeText' form='unqualified'></xsd:element>
 							                    <xsd:element minOccurs='0' nillable='true' type='xsd:date' name='GLNCreationDate' form='unqualified'></xsd:element>
 						                    </xsd:sequence>
 					                    </xsd:complexType>

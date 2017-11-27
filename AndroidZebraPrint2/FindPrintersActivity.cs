@@ -18,7 +18,7 @@ namespace DakotaIntegratedSolutions
         ObservableCollection<IZebraPrinter> printerList = new ObservableCollection<IZebraPrinter>();
         IZebraPrinter zebraPrinter;
         IFileUtil fileUtility;
-        IDiscoveryEventHandler discoveryEventHandler = null;
+        IDiscoveryEventHandler discoveryEventHandler = DiscoveryHandlerFactory.Current.GetInstance();
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -37,7 +37,8 @@ namespace DakotaIntegratedSolutions
             try
             {
                 IZebraPrinter bluetoothPrinter = printerList[e.Position];
-                RemoveHandlers();
+                LinkOS.Plugin.Abstractions.IDiscoveryEventHandler bthandler = DiscoveryHandlerFactory.Current.GetInstance();
+                RemoveHandlers(bthandler);
                 if (bluetoothPrinter is IZebraPrinter)
                 {
                     SetPrinter(bluetoothPrinter);
@@ -65,26 +66,26 @@ namespace DakotaIntegratedSolutions
 
         private void SearchForPrinters()
         {
-            SetUpHandlers();
             printerList = new ObservableCollection<IZebraPrinter>();
-            LinkOS.Plugin.Abstractions.IDiscoveryHandler bthandler = DiscoveryHandler.Current;
+            LinkOS.Plugin.Abstractions.IDiscoveryEventHandler bthandler = DiscoveryHandlerFactory.Current.GetInstance();
+            SetUpHandlers(bthandler);
             System.Diagnostics.Debug.WriteLine("Starting Bluetooth Discovery");
             IPrinterDiscovery discover = new PrinterDiscoveryImplementation();
             discover.FindBluetoothPrinters(bthandler);
         }
 
-        private void SetUpHandlers()
+        private void SetUpHandlers(IDiscoveryEventHandler bthandler)
         {
-            discoveryEventHandler.OnDiscoveryError += DiscoveryHandler_OnDiscoveryError;
-            discoveryEventHandler.OnDiscoveryFinished += DiscoveryHandler_OnDiscoveryFinished;
-            discoveryEventHandler.OnFoundPrinter += DiscoveryHandler_OnFoundPrinter;
+            bthandler.OnDiscoveryError += DiscoveryHandler_OnDiscoveryError;
+            bthandler.OnDiscoveryFinished += DiscoveryHandler_OnDiscoveryFinished;
+            bthandler.OnFoundPrinter += DiscoveryHandler_OnFoundPrinter;
         }
 
-        private void RemoveHandlers()
+        private void RemoveHandlers(IDiscoveryEventHandler bthandler)
         {
-            discoveryEventHandler.OnDiscoveryError -= DiscoveryHandler_OnDiscoveryError;
-            discoveryEventHandler.OnDiscoveryFinished -= DiscoveryHandler_OnDiscoveryFinished;
-            discoveryEventHandler.OnFoundPrinter -= DiscoveryHandler_OnFoundPrinter;
+            bthandler.OnDiscoveryError -= DiscoveryHandler_OnDiscoveryError;
+            bthandler.OnDiscoveryFinished -= DiscoveryHandler_OnDiscoveryFinished;
+            bthandler.OnFoundPrinter -= DiscoveryHandler_OnFoundPrinter;
         }
 
         private void DiscoveryHandler_OnFoundPrinter(object sender, IDiscoveredPrinter discoveredPrinter)
@@ -115,14 +116,14 @@ namespace DakotaIntegratedSolutions
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
                 fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
             }
-            RemoveHandlers();
+            LinkOS.Plugin.Abstractions.IDiscoveryEventHandler bthandler = DiscoveryHandlerFactory.Current.GetInstance();
+            RemoveHandlers(bthandler);
         }
 
         private void DiscoveryHandler_OnDiscoveryError(object sender, string message)
         {
-            //System.Diagnostics.Debug.WriteLine("On Discovery Error: " + connetionType.ToString());
-            //OnError(message);
-            RemoveHandlers();
+            LinkOS.Plugin.Abstractions.IDiscoveryEventHandler bthandler = DiscoveryHandlerFactory.Current.GetInstance();
+            RemoveHandlers(bthandler);
         }
     }
 }

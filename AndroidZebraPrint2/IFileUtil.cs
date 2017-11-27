@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using System.Collections.Generic;
+using static DakotaIntegratedSolutions.FileUtilImplementation;
 
 namespace DakotaIntegratedSolutions
 {
@@ -11,5 +12,6 @@ namespace DakotaIntegratedSolutions
         IEnumerable<string> GetFileList();
         void LogFile(string sExceptionName, string sEventName, string sControlName, int nErrorLineNo, string sFormName);
         void SaveLocation(string filename, IGLNLocation iGLNLocation);
+        CSVFileFormat FileFormat { get; set; }
     }
 }

@@ -14,8 +14,6 @@ using Excel;
 using System.Data;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml;
-using System.Diagnostics;
-using Android.App;
 
 namespace DakotaIntegratedSolutions
 {
@@ -101,7 +99,7 @@ namespace DakotaIntegratedSolutions
 #if DEBUG
                 //documentsPath = "/mnt/sdcard";
 #else
-                documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+                //documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 #endif
                 return documentsPath;
             }
@@ -480,6 +478,7 @@ namespace DakotaIntegratedSolutions
 
         public IEnumerable<string> GetFileList()
         {
+            LogFile("Log", "Building File List", MethodBase.GetCurrentMethod().Name, 0, GetType().Name);
             var directory = new DirectoryInfo(Directorypath);
             var masks = new[] { "*.csv"/*, "*.xlsx"*/ };
             var files = masks.SelectMany(directory.EnumerateFiles);

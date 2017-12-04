@@ -10,7 +10,7 @@
     <string name="FindPrinters">Find Printers</string>
     <string name="LoadDataFile">Load Data File</string>
     <string name="NoPrinter">No Printer Selected</string>
-    <string name="FindFiles">Select Data Files...</string>
+    <string name="FindFiles">Select Data File...</string>
     <string name="RowInfo">Location Information</string>
     <string name="SearchLocation">Search For Room Code</string>
     <string name="AboutBox">About</string>

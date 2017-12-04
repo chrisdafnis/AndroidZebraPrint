@@ -1,10 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
-using Android.Graphics;
 using Android.OS;
-using Android.Runtime;
-using Android.Text;
-using Android.Text.Style;
 using Android.Views;
 using Android.Widget;
 using static Android.Widget.AdapterView;
@@ -16,10 +12,9 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 using Zebra.Sdk.Comm;
-using AndroidZebraPrint2;
 using AndroidHUD;
-using System.Linq;
-using static DakotaIntegratedSolutions.FileUtilImplementation;
+using System.IO;
+//using static DakotaIntegratedSolutions.FileUtilImplementation;
 
 //using Com.Mitac.Cell.Device;
 
@@ -35,7 +30,12 @@ namespace DakotaIntegratedSolutions
         int printQuantity = 1;
         string locationsFile;
         int currentSelected = 0;
-        public enum ActivityCode { FindPrinters = 0, PrintQuantity, LoadLocations, About/*, LocationInfo, LocationSearch*/ };
+
+        public object Directorypath { get; private set; }
+
+        public enum CSVFileFormat { PLYMOUTH = 0, CORNWALL, NORTHTEES, UNKNOWN };
+
+        public enum ActivityCode { FindPrinters = 0, PrintQuantity, LoadLocations, LocationInfo, LocationSearch, About };
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -57,6 +57,8 @@ namespace DakotaIntegratedSolutions
 
             // set up file utility for saving/loading settings
             fileUtility = new FileUtilImplementation();
+            //fileUtility.LogFile("app Startup", "Logfile Test", MethodBase.GetCurrentMethod().Name, 0, Class.SimpleName);
+            LogFile("app Startup", "Logfile Test", MethodBase.GetCurrentMethod().Name, 0, Class.SimpleName);
             zebraPrinter = (IZebraPrinter)fileUtility.LoadXMLSettings();
             try
             {
@@ -66,9 +68,10 @@ namespace DakotaIntegratedSolutions
             catch (Exception ex)
             {
                 ((TextView)FindViewById<TextView>(AndroidZebraPrint2.Resource.Id.selectedPrinterTxt)).SetText(AndroidZebraPrint2.Resource.String.NoPrinter);
-            
+
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
+                //fileUtility.
+                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
             }
 
 #if DEBUG
@@ -137,39 +140,42 @@ namespace DakotaIntegratedSolutions
                     StartActivityForResult(findPrintersPage, (int)ActivityCode.FindPrinters);
                     return true;
                 case AndroidZebraPrint2.Resource.Id.LoadDataFile:
+                    //fileUtility.
+                    LogFile("log", "entering FindFilesActivity", MethodBase.GetCurrentMethod().Name, 0, GetType().Name);
+
                     var findFilesPage = new Android.Content.Intent(this, typeof(FindFilesActivity));
                     StartActivityForResult(findFilesPage, (int)ActivityCode.LoadLocations);
                     return true;
-                //case AndroidZebraPrint2.Resource.Id.RowInfo:
-                //    var rowInfoPage = new Android.Content.Intent(this, typeof(LocationInfoActivity));
-                //    IGLNLocation location = locationList[currentSelected];
-                //    String info = String.Format("  Region: {0}\n\r" +
-                //                                " Site: {1}\n\r" + 
-                //                                " Building: {2}\n\r" + 
-                //                                " Floor: {3}\n\r" + 
-                //                                " Room: {4}\n\r" + 
-                //                                " Code: {5}\n\r" + 
-                //                                " GLN: {6}\n\r" + 
-                //                                " Date: {7}",
-                //        location.Region,
-                //        location.Site,
-                //        location.Building,
-                //        location.Floor,
-                //        location.Room,
-                //        location.Code,
-                //        location.GLN,
-                //        location.Date.ToString());
-                //    rowInfoPage.PutExtra("location", info);
-                //    StartActivityForResult(rowInfoPage, (int)ActivityCode.LocationInfo);
-                //    return true;
+                case AndroidZebraPrint2.Resource.Id.RowInfo:
+                    var rowInfoPage = new Android.Content.Intent(this, typeof(LocationInfoActivity));
+                    IGLNLocation location = locationList[currentSelected];
+                    String info = String.Format("  Region: {0}\n\r" +
+                                                " Site: {1}\n\r" +
+                                                " Building: {2}\n\r" +
+                                                " Floor: {3}\n\r" +
+                                                " Room: {4}\n\r" +
+                                                " Code: {5}\n\r" +
+                                                " GLN: {6}\n\r" +
+                                                " Date: {7}",
+                        location.Region,
+                        location.Site,
+                        location.Building,
+                        location.Floor,
+                        location.Room,
+                        location.Code,
+                        location.GLN,
+                        location.Date.ToString());
+                    rowInfoPage.PutExtra("location", info);
+                    StartActivityForResult(rowInfoPage, (int)ActivityCode.LocationInfo);
+                    return true;
                 case AndroidZebraPrint2.Resource.Id.About:
                     var aboutPage = new Android.Content.Intent(this, typeof(AboutButtonActivity));
                     StartActivityForResult(aboutPage, (int)ActivityCode.About);
                     return true;
-                //case AndroidZebraPrint2.Resource.Id.SearchLocation:
-                //    var searchLocationPage = new Android.Content.Intent(this, typeof(FindLocationActivity));
-                //    StartActivityForResult(searchLocationPage, (int)ActivityCode.LocationSearch);
-                //    return true;
+                case AndroidZebraPrint2.Resource.Id.SearchLocation:
+                    var searchLocationPage = new Android.Content.Intent(this, typeof(FindLocationActivity));
+                    StartActivityForResult(searchLocationPage, (int)ActivityCode.LocationSearch);
+                    return true;
                 case AndroidZebraPrint2.Resource.Id.Quit:
                     AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
@@ -224,7 +230,8 @@ namespace DakotaIntegratedSolutions
                             catch (Exception ex)
                             {
                                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
+                                //fileUtility.
+                                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
                             }
                         }
                         if (resultCode == Result.Canceled)
@@ -238,6 +245,7 @@ namespace DakotaIntegratedSolutions
                         if (resultCode == Result.Ok)
                         {
                             locationsFile = data.GetStringExtra("filename");
+                            fileUtility.LogFile("log", "filename: " + locationsFile, MethodBase.GetCurrentMethod().Name, 0, GetType().Name);
                             LoadFile(locationsFile);
                         }
                         //if (resultCode == Result.Canceled)
@@ -255,54 +263,54 @@ namespace DakotaIntegratedSolutions
                         //}
                     }
                     break;
-                    //case ActivityCode.LocationInfo:
-                    //    {
-                    //        if (resultCode == Result.Ok)
-                    //        {
-                    //        }
-                    //        if (resultCode == Result.Canceled)
-                    //        {
-                    //            //Write your code if there's no result
-                    //        }
-                    //    }
-                    //    break;
-                    //    case ActivityCode.LocationSearch:
-                    //        {
-                    //            if (resultCode == Result.Ok)
-                    //            {
-                    //                string searchLocation = data.GetStringExtra("location");
-                    //                CustomArrayAdapter adapter = (CustomArrayAdapter)locationsView.Adapter;
-                    //                int i = 0;
-                    //                bool found = false;
-                    //                foreach (IGLNLocation location in locationList)
-                    //                {
-                    //                    if (location.Code == searchLocation)
-                    //                    {
-                    //                        found = true;
-                    //                        adapter.SetSelectedIndex(i);
-                    //                        currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
-                    //                        locationsView.SmoothScrollToPosition(i);
-                    //                        break;
-                    //                    }
-                    //                    i++;
-                    //                }
-                    //                if (!found)
-                    //                {
-                    //                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                case ActivityCode.LocationInfo:
+                    {
+                        if (resultCode == Result.Ok)
+                        {
+                        }
+                        if (resultCode == Result.Canceled)
+                        {
+                            //Write your code if there's no result
+                        }
+                    }
+                    break;
+                case ActivityCode.LocationSearch:
+                    {
+                        if (resultCode == Result.Ok)
+                        {
+                            string searchLocation = data.GetStringExtra("location");
+                            CustomArrayAdapter adapter = (CustomArrayAdapter)locationsView.Adapter;
+                            int i = 0;
+                            bool found = false;
+                            foreach (IGLNLocation location in locationList)
+                            {
+                                if (location.Code.ToLower() == searchLocation.ToLower())
+                                {
+                                    found = true;
+                                    adapter.SetSelectedIndex(i);
+                                    currentSelected = ((CustomArrayAdapter)locationsView.Adapter).GetSelectedIndex();
+                                    locationsView.SmoothScrollToPosition(i);
+                                    break;
+                                }
+                                i++;
+                            }
+                            if (!found)
+                            {
+                                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
-                    //                    dialogBuilder.SetTitle("Code Not Found");
-                    //                    dialogBuilder.SetMessage("The room code '" + searchLocation + "' does not exist in the current database");
-                    //                    dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
-                    //                    dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate { });
-                    //                    dialogBuilder.Show();
-                    //                }
-                    //            }
-                    //            if (resultCode == Result.Canceled)
-                    //            {
-                    //                //Write your code if there's no result
-                    //            }
-                    //        }
-                    //        break;
+                                dialogBuilder.SetTitle("Code Not Found");
+                                dialogBuilder.SetMessage("The room code '" + searchLocation + "' does not exist in the current database");
+                                dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
+                                dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate { });
+                                dialogBuilder.Show();
+                            }
+                        }
+                        if (resultCode == Result.Canceled)
+                        {
+                            //Write your code if there's no result
+                        }
+                    }
+                    break;
             }
         }
 
@@ -317,7 +325,8 @@ namespace DakotaIntegratedSolutions
             catch (Exception ex)
             {
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+                //fileUtility.
+                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
             }
         }
         public async void LoadFile(string filename)
@@ -348,14 +357,15 @@ namespace DakotaIntegratedSolutions
             }
             catch (Exception ex)
             {//call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
+             //fileUtility.
+                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), GetType().Name);
                 return;
             }
 
             XDocument xDoc = XDocument.Parse((string)res);
             if (xDoc != null)
             {
-                CSVFileFormat fileType = fileUtility.FileFormat;
+                CSVFileFormat fileType = (CSVFileFormat)fileUtility.FileFormat;
                 locationList = new System.Collections.ObjectModel.ObservableCollection<IGLNLocation>();
                 XName xName = XName.Get("GLNLocation");
                 if (fileType == CSVFileFormat.PLYMOUTH)
@@ -425,7 +435,8 @@ namespace DakotaIntegratedSolutions
                 catch (Exception ex)
                 {
                     //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                    fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
+                    //fileUtility.
+                    LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
                 }
             }
             else
@@ -467,7 +478,8 @@ namespace DakotaIntegratedSolutions
             catch (Exception ex)
             {
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
+                //fileUtility.
+                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
             }
         }
 
@@ -494,7 +506,8 @@ namespace DakotaIntegratedSolutions
 
                 // Actual Label
                 string zplData = GetZplGLNLabel(locationList[currentSelected]);
-                fileUtility.LogFile("ZPL Output Debug", zplData, "MainActivity", 440, "SendZplOverBluetooth");
+                //fileUtility.
+                LogFile("ZPL Output Debug", zplData, "MainActivity", 440, "SendZplOverBluetooth");
 
                 // Send the data to printer as a byte array.
                 //connection.Write(GetBytes(zplData));
@@ -506,7 +519,8 @@ namespace DakotaIntegratedSolutions
             catch (Zebra.Sdk.Comm.ConnectionException ex)
             {
                 //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
-                fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
+                //fileUtility.
+                LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
             }
             return success;
         }
@@ -578,6 +592,35 @@ namespace DakotaIntegratedSolutions
                 return false;
             else
             return true;
+        }
+
+        public void LogFile(string sExceptionName, string sEventName, string sControlName, int nErrorLineNo, string sFormName)
+        {
+            StreamWriter log;
+            DateTime today = DateTime.Now;
+            String filename = String.Format("{0}/{1:ddMMyyyy}.log",
+                "/mnt/ext_sdcard", today);
+
+            if (!File.Exists(filename))
+            {
+                log = new StreamWriter(filename);
+            }
+            else
+            {
+                log = File.AppendText(filename);
+            }
+
+            // Write to the file:
+            log.WriteLine(String.Format("{0}{1}", "-----------------------------------------------", System.Environment.NewLine));
+            log.WriteLine(String.Format("{0}{1}{2}", "Log Time: ", DateTime.Now, System.Environment.NewLine));
+            log.WriteLine(String.Format("{0}{1}{2}", "Exception Name: ", sExceptionName, System.Environment.NewLine));
+            log.WriteLine(String.Format("{0}{1}{2}", "Event Name: ", sEventName, System.Environment.NewLine));
+            log.WriteLine(String.Format("{0}{1}{2}", "Control Name: ", sControlName, System.Environment.NewLine));
+            log.WriteLine(String.Format("{0}{1}{2}", "Error Line No.: ", nErrorLineNo, System.Environment.NewLine));
+            log.WriteLine(String.Format("{0}{1}{2}", "Form Name: ", sFormName, System.Environment.NewLine));
+
+            // Close the stream:
+            log.Close();
         }
     }
 }

@@ -1,4 +1,3 @@
-
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -21,11 +20,10 @@ namespace DakotaIntegratedSolutions
 
     class CustomArrayAdapter : ArrayAdapter
     {
-        private IList objectList;
-        private int layoutResourceId;
-        private int selectedIndex;
-        private Dictionary<int, bool> printedItems;
-        private int[] colors = new int[] { Color.LightBlue, Color.White };
+        IList objectList;
+        int layoutResourceId, selectedIndex;
+        Dictionary<int, bool> printedItems;
+        int[] colors = new int[] { Color.LightBlue, Color.White };
 
         public CustomArrayAdapter(Context context, int layout, System.Collections.IList objects) : base(context, layout, objects)
         {
@@ -34,18 +32,9 @@ namespace DakotaIntegratedSolutions
             printedItems = new Dictionary<int, bool>();
         }
 
-        public override int Count
-        {
-            get
-            {
-                return base.Count;
-            }
-        }
+        public override int Count => base.Count;
 
-        public int GetSelectedIndex()
-        {
-            return selectedIndex;
-        }
+        public int GetSelectedIndex() => selectedIndex;
 
         public void SetSelectedIndex(int index)
         {
@@ -61,31 +50,23 @@ namespace DakotaIntegratedSolutions
                 {
                     printedItems.Remove(index);
                 }
+
                 printedItems.Add(index, true);
                 NotifyDataSetChanged();
             }
             catch (Exception ex)
             {
                 IFileUtil fileUtility = new FileUtilImplementation();
-                //call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
+                // call LogFile method and pass argument as Exception message, event name, control name, error line number, current form name
                 fileUtility.LogFile(ex.Message, ex.ToString(), MethodBase.GetCurrentMethod().Name, ExceptionHelper.LineNumber(ex), Class.SimpleName);
             }
         }
 
-        public override int GetItemViewType(int position)
-        {
-            return base.GetItemViewType(position);
-        }
+        public override int GetItemViewType(int position) => base.GetItemViewType(position);
 
-        public override Java.Lang.Object GetItem(int position)
-        {
-            return base.GetItem(position);
-        }
+        public override Java.Lang.Object GetItem(int position) => base.GetItem(position);
 
-        public override long GetItemId(int position)
-        {
-            return base.GetItemId(position);
-        }
+        public override long GetItemId(int position) => base.GetItemId(position);
 
         public override View GetView(int position, View convertView, ViewGroup parent)
         {
@@ -94,12 +75,12 @@ namespace DakotaIntegratedSolutions
 
             holder = new ViewHolder();
             var inflater = Application.Context.GetSystemService(Context.LayoutInflaterService) as LayoutInflater;
-            
-            int colorPos = position % colors.Length;
-            Color color = new Color(colors[colorPos]);
+
+            var colorPos = position % colors.Length;
+            var color = new Color(colors[colorPos]);
             convertView.SetBackgroundColor(color);
 
-            TextView text = convertView.FindViewById<TextView>(AndroidZebraPrint2.Resource.Id.ListItemRowText);
+            var text = convertView.FindViewById<TextView>(AndroidZebraPrint2.Resource.Id.ListItemRowText);
             text.Text = objectList[position].ToString();
             holder.Text = text;
             holder.Selected = false;
@@ -120,28 +101,28 @@ namespace DakotaIntegratedSolutions
             return convertView;
         }
 
-        private void HighlightCurrentRow(View rowView)
+        void HighlightCurrentRow(View rowView)
         {
             rowView.SetBackgroundColor(Color.DarkGray);
-            TextView textView = (TextView)rowView.FindViewById(AndroidZebraPrint2.Resource.Id.ListItemRowText);
+            var textView = (TextView)rowView.FindViewById(AndroidZebraPrint2.Resource.Id.ListItemRowText);
             if (textView != null)
                 textView.SetTextColor(Color.Yellow);
         }
 
-        private void UnhighlightCurrentRow(View rowView)
+        void UnhighlightCurrentRow(View rowView)
         {
             rowView.SetBackgroundColor(Color.Transparent);
-            TextView textView = (TextView)rowView.FindViewById(AndroidZebraPrint2.Resource.Id.ListItemRowText);
+            var textView = (TextView)rowView.FindViewById(AndroidZebraPrint2.Resource.Id.ListItemRowText);
             if (textView != null)
                 textView.SetTextColor(Color.Black);
         }
 
-        private void HighlightPrintedRow(View rowView, int position)
+        void HighlightPrintedRow(View rowView, int position)
         {
             if (printedItems.ContainsKey(position))
             {
                 rowView.SetBackgroundColor(Color.ParseColor("#0A64A2"));
-                TextView textView = (TextView)rowView.FindViewById(AndroidZebraPrint2.Resource.Id.ListItemRowText);
+                var textView = (TextView)rowView.FindViewById(AndroidZebraPrint2.Resource.Id.ListItemRowText);
                 if (textView != null)
                     textView.SetTextColor(Color.White);
             }
@@ -150,8 +131,8 @@ namespace DakotaIntegratedSolutions
 
     class AlternateRowAdapter : ArrayAdapter
     {
-        private int[] colors = new int[] { Color.LightBlue, Color.White};
-        private IList objectList;
+        int[] colors = new int[] { Color.LightBlue, Color.White };
+        IList objectList;
 
         public AlternateRowAdapter(Context context, int layout, System.Collections.IList objects) : base(context, layout, objects)
         {
@@ -165,11 +146,11 @@ namespace DakotaIntegratedSolutions
             holder = new ViewHolder();
             var inflater = Application.Context.GetSystemService(Context.LayoutInflaterService) as LayoutInflater;
 
-            int colorPos = position % colors.Length;
-            Color color = new Color(colors[colorPos]);
+            var colorPos = position % colors.Length;
+            var color = new Color(colors[colorPos]);
             convertView.SetBackgroundColor(color);
 
-            TextView textView = convertView.FindViewById<TextView>(AndroidZebraPrint2.Resource.Id.ListItemRowText);
+            var textView = convertView.FindViewById<TextView>(AndroidZebraPrint2.Resource.Id.ListItemRowText);
             textView.Text = objectList[position].ToString();
 
             if (textView != null)

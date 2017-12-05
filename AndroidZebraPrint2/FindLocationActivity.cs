@@ -1,16 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
-using Android.Views;
 using Android.Widget;
-using System.Reflection;
 using AndroidZebraPrint2;
+using System;
 
 namespace DakotaIntegratedSolutions
 {
@@ -34,10 +27,10 @@ namespace DakotaIntegratedSolutions
             fileUtility = new FileUtilImplementation();
         }
 
-        private void ButtonSearch_Click(object sender, EventArgs e)
+        void ButtonSearch_Click(object sender, EventArgs e)
         {
             searchLocation = searchLocationText.Text;
-            Intent returnIntent = new Intent();
+            var returnIntent = new Intent();
             returnIntent.PutExtra("location", searchLocation);
             SetResult(Result.Ok, returnIntent);
             Finish();

@@ -1,21 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using System.Data;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml;
-using System.Text.RegularExpressions;
+using System;
+using System.Data;
 using System.IO;
-using System.IO.Packaging;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DakotaIntegratedSolutions
 {
@@ -23,72 +14,72 @@ namespace DakotaIntegratedSolutions
     {
         public static DataTable ReadExcelFile(FileStream stream)
         {
-            DataTable dt = new DataTable();
+            var dt = new DataTable();
             try
             {
                 using (SpreadsheetDocument spreadSheetDocument = SpreadsheetDocument.Open(stream, false))
                 {
-                    WorkbookPart workbookPart = spreadSheetDocument.WorkbookPart;
-                    WorksheetPart worksheetPart = workbookPart.WorksheetParts.First<WorksheetPart>();
-                    Row lastRow = worksheetPart.Worksheet.Descendants<Row>().LastOrDefault();
-                    Row firstRow = worksheetPart.Worksheet.Descendants<Row>().FirstOrDefault();
+                    var workbookPart = spreadSheetDocument.WorkbookPart;
+                    var worksheetPart = workbookPart.WorksheetParts.First<WorksheetPart>();
+                    var lastRow = worksheetPart.Worksheet.Descendants<Row>().LastOrDefault();
+                    var firstRow = worksheetPart.Worksheet.Descendants<Row>().FirstOrDefault();
 
-                //    IEnumerable<Sheet> sheets = spreadSheetDocument.WorkbookPart.Workbook.GetFirstChild<Sheets>().Elements<Sheet>();
-                //    string relationshipId = sheets.First().Id.Value;
-                //    WorksheetPart worksheetPart = (WorksheetPart)spreadSheetDocument.WorkbookPart.GetPartById(relationshipId);
-                //    Worksheet workSheet = worksheetPart.Worksheet;
-                //    SheetData sheetData = workSheet.GetFirstChild<SheetData>();
-                //    IEnumerable<Row> rows = sheetData.Descendants<Row>();
+                    //    IEnumerable<Sheet> sheets = spreadSheetDocument.WorkbookPart.Workbook.GetFirstChild<Sheets>().Elements<Sheet>();
+                    //    string relationshipId = sheets.First().Id.Value;
+                    //    WorksheetPart worksheetPart = (WorksheetPart)spreadSheetDocument.WorkbookPart.GetPartById(relationshipId);
+                    //    Worksheet workSheet = worksheetPart.Worksheet;
+                    //    SheetData sheetData = workSheet.GetFirstChild<SheetData>();
+                    //    IEnumerable<Row> rows = sheetData.Descendants<Row>();
 
-                //    foreach (Cell cell in rows.ElementAt(0))
-                //    {
-                //        dt.Columns.Add(GetCellValue(spreadSheetDocument, cell));
-                //    }
+                    //    foreach (Cell cell in rows.ElementAt(0))
+                    //    {
+                    //        dt.Columns.Add(GetCellValue(spreadSheetDocument, cell));
+                    //    }
 
-                //    foreach (Row row in rows) //this will also include your header row...
-                //    {
-                //        DataRow tempRow = dt.NewRow();
+                    //    foreach (Row row in rows) //this will also include your header row...
+                    //    {
+                    //        DataRow tempRow = dt.NewRow();
 
-                //        for (int i = 0; i < row.Descendants<Cell>().Count(); i++)
-                //        {
-                //            tempRow[i] = GetCellValue(spreadSheetDocument, row.Descendants<Cell>().ElementAt(i - 1));
-                //        }
+                    //        for (int i = 0; i < row.Descendants<Cell>().Count(); i++)
+                    //        {
+                    //            tempRow[i] = GetCellValue(spreadSheetDocument, row.Descendants<Cell>().ElementAt(i - 1));
+                    //        }
 
-                //        dt.Rows.Add(tempRow);
-                //    }
+                    //        dt.Rows.Add(tempRow);
+                    //    }
 
-                //}
-                //dt.Rows.RemoveAt(0); //...so i'm taking it out here.
-                                     
-                //WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart;
+                    // }
+                    // dt.Rows.RemoveAt(0); //...so i'm taking it out here.
 
-                //// Iterate through all WorksheetParts
-                //foreach (WorksheetPart worksheetPart in workbookPart.WorksheetParts)
-                //{
-                //    OpenXmlPartReader reader = new OpenXmlPartReader(worksheetPart);
-                //    string rowNum;
-                //    while (reader.Read())
-                //    {
-                //        if (reader.ElementType == typeof(Row))
-                //        {
-                //            do
-                //            {
-                //                if (reader.HasAttributes)
-                //                {
-                //                    rowNum = reader.Attributes.First(a => a.LocalName == "r").Value;
-                //                    Console.Write("rowNum: " + rowNum);
-                //                }
+                    // WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart;
 
-                //            } while (reader.ReadNextSibling()); // Skip to the next row
+                    // // Iterate through all WorksheetParts
+                    // foreach (WorksheetPart worksheetPart in workbookPart.WorksheetParts)
+                    // {
+                    //    OpenXmlPartReader reader = new OpenXmlPartReader(worksheetPart);
+                    //    string rowNum;
+                    //    while (reader.Read())
+                    //    {
+                    //        if (reader.ElementType == typeof(Row))
+                    //        {
+                    //            do
+                    //            {
+                    //                if (reader.HasAttributes)
+                    //                {
+                    //                    rowNum = reader.Attributes.First(a => a.LocalName == "r").Value;
+                    //                    Console.Write("rowNum: " + rowNum);
+                    //                }
 
-                //            break; // We just looped through all the rows so no 
-                //                   // need to continue reading the worksheet
-                //        }
+                    //            } while (reader.ReadNextSibling()); // Skip to the next row
 
-                //        if (reader.ElementType != typeof(Worksheet))
-                //            reader.Skip();
-                //    }
-                //    reader.Close();
+                    //            break; // We just looped through all the rows so no 
+                    //                   // need to continue reading the worksheet
+                    //        }
+
+                    //        if (reader.ElementType != typeof(Worksheet))
+                    //            reader.Skip();
+                    //    }
+                    //    reader.Close();
                 }
             }
             catch (Exception)
@@ -96,14 +87,14 @@ namespace DakotaIntegratedSolutions
             return dt;
         }
 
-        private static string GetCellValue(SpreadsheetDocument document, Cell cell)
+        static string GetCellValue(SpreadsheetDocument document, Cell cell)
         {
-            SharedStringTablePart stringTablePart = document.WorkbookPart.SharedStringTablePart;
-            string value = cell.CellValue.InnerXml;
+            var stringTablePart = document.WorkbookPart.SharedStringTablePart;
+            var value = cell.CellValue.InnerXml;
 
             if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
             {
-                return stringTablePart.SharedStringTable.ChildElements[Int32.Parse(value)].InnerText;
+                return stringTablePart.SharedStringTable.ChildElements[int.Parse(value)].InnerText;
             }
             else
             {
@@ -122,22 +113,21 @@ namespace DakotaIntegratedSolutions
             spreadsheet.WorkbookPart.Workbook.Append(new BookViews(new WorkbookView()));
 
             //  If we don't add a "WorkbookStylesPart", OLEDB will refuse to connect to this .xlsx file !
-            WorkbookStylesPart workbookStylesPart = spreadsheet.WorkbookPart.AddNewPart<WorkbookStylesPart>("rIdStyles");
-            Stylesheet stylesheet = new Stylesheet();
+            var workbookStylesPart = spreadsheet.WorkbookPart.AddNewPart<WorkbookStylesPart>("rIdStyles");
+            var stylesheet = new Stylesheet();
             workbookStylesPart.Stylesheet = stylesheet;
-
 
             //  Loop through each of the DataTables in our DataSet, and create a new Excel Worksheet for each.
             uint worksheetNumber = 1;
-            Sheets sheets = spreadsheet.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
+            var sheets = spreadsheet.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
             foreach (DataTable dt in ds.Tables)
             {
                 //  For each worksheet you want to create
-                string worksheetName = dt.TableName;
+                var worksheetName = dt.TableName;
 
                 //  Create worksheet part, and add it to the sheets collection in workbook
-                WorksheetPart newWorksheetPart = spreadsheet.WorkbookPart.AddNewPart<WorksheetPart>();
-                Sheet sheet = new Sheet() { Id = spreadsheet.WorkbookPart.GetIdOfPart(newWorksheetPart), SheetId = worksheetNumber, Name = worksheetName };
+                var newWorksheetPart = spreadsheet.WorkbookPart.AddNewPart<WorksheetPart>();
+                var sheet = new Sheet() { Id = spreadsheet.WorkbookPart.GetIdOfPart(newWorksheetPart), SheetId = worksheetNumber, Name = worksheetName };
 
                 // If you want to define the Column Widths for a Worksheet, you need to do this *before* appending the SheetData
                 // http://social.msdn.microsoft.com/Forums/en-US/oxmlsdk/thread/1d93eca8-2949-4d12-8dd9-15cc24128b10/
@@ -153,19 +143,19 @@ namespace DakotaIntegratedSolutions
             spreadsheet.WorkbookPart.Workbook.Save();
         }
 
-        private static void WriteDataTableToExcelWorksheet(DataTable dt, WorksheetPart worksheetPart)
+        static void WriteDataTableToExcelWorksheet(DataTable dt, WorksheetPart worksheetPart)
         {
-            OpenXmlWriter writer = OpenXmlWriter.Create(worksheetPart, Encoding.ASCII);
+            var writer = OpenXmlWriter.Create(worksheetPart, Encoding.ASCII);
             writer.WriteStartElement(new Worksheet());
             writer.WriteStartElement(new SheetData());
 
-            string cellValue = "";
+            var cellValue = "";
 
             //  Create a Header Row in our Excel file, containing one header for each Column of data in our DataTable.
             //
             //  We'll also create an array, showing which type each column of data is (Text or Numeric), so when we come to write the actual
             //  cells of data, we'll know if to write Text values or Numeric cell values.
-            int numberOfColumns = dt.Columns.Count;
+            var numberOfColumns = dt.Columns.Count;
             bool[] IsNumericColumn = new bool[numberOfColumns];
             bool[] IsDateColumn = new bool[numberOfColumns];
 
@@ -181,11 +171,12 @@ namespace DakotaIntegratedSolutions
             writer.WriteStartElement(new Row { RowIndex = rowIndex });
             for (int colInx = 0; colInx < numberOfColumns; colInx++)
             {
-                DataColumn col = dt.Columns[colInx];
+                var col = dt.Columns[colInx];
                 AppendTextCell(excelColumnNames[colInx] + "1", col.ColumnName, ref writer);
                 IsNumericColumn[colInx] = (col.DataType.FullName == "System.Decimal") || (col.DataType.FullName == "System.Int32") || (col.DataType.FullName == "System.Double") || (col.DataType.FullName == "System.Single");
                 IsDateColumn[colInx] = (col.DataType.FullName == "System.DateTime");
             }
+
             writer.WriteEndElement();   //  End of header "Row"
 
             //
@@ -219,7 +210,7 @@ namespace DakotaIntegratedSolutions
                     else if (IsDateColumn[colInx])
                     {
                         //  This is a date value.
-                        string strValue = "";
+                        var strValue = "";
                         if (DateTime.TryParse(cellValue, out DateTime dtValue))
                             strValue = dtValue.ToShortDateString();
                         AppendTextCell(excelColumnNames[colInx] + rowIndex.ToString(), strValue, ref writer);
@@ -230,8 +221,10 @@ namespace DakotaIntegratedSolutions
                         AppendTextCell(excelColumnNames[colInx] + rowIndex.ToString(), cellValue, ref writer);
                     }
                 }
+
                 writer.WriteEndElement(); //  End of Row
             }
+
             writer.WriteEndElement(); //  End of SheetData
             writer.WriteEndElement(); //  End of worksheet
 
@@ -264,14 +257,15 @@ namespace DakotaIntegratedSolutions
                 return string.Format("{0}{1}", firstChar, secondChar);
             }
 
-            int firstInt = columnIndex / 26 / 26;
-            int secondInt = (columnIndex - firstInt * 26 * 26) / 26;
+            var firstInt = columnIndex / 26 / 26;
+            var secondInt = (columnIndex - firstInt * 26 * 26) / 26;
             if (secondInt == 0)
             {
                 secondInt = 26;
                 firstInt = firstInt - 1;
             }
-            int thirdInt = (columnIndex - firstInt * 26 * 26 - secondInt * 26);
+
+            var thirdInt = (columnIndex - firstInt * 26 * 26 - secondInt * 26);
 
             firstChar = (char)('A' + firstInt - 1);
             secondChar = (char)('A' + secondInt - 1);
@@ -280,7 +274,7 @@ namespace DakotaIntegratedSolutions
             return string.Format("{0}{1}{2}", firstChar, secondChar, thirdChar);
         }
 
-        private static void AppendTextCell(string cellReference, string cellStringValue, ref OpenXmlWriter writer)
+        static void AppendTextCell(string cellReference, string cellStringValue, ref OpenXmlWriter writer)
         {
             //  Add a new Excel Cell to our Row 
             writer.WriteElement(new Cell
@@ -291,7 +285,7 @@ namespace DakotaIntegratedSolutions
             });
         }
 
-        private static void AppendNumericCell(string cellReference, string cellStringValue, ref OpenXmlWriter writer)
+        static void AppendNumericCell(string cellReference, string cellStringValue, ref OpenXmlWriter writer)
         {
             //  Add a new Excel Cell to our Row 
             writer.WriteElement(new Cell
@@ -302,9 +296,9 @@ namespace DakotaIntegratedSolutions
             });
         }
 
-        private static string ReplaceHexadecimalSymbols(string txt)
+        static string ReplaceHexadecimalSymbols(string txt)
         {
-            string r = "[\x00-\x08\x0B\x0C\x0E-\x1F\x26]";
+            var r = "[\x00-\x08\x0B\x0C\x0E-\x1F\x26]";
             return Regex.Replace(txt, r, "", RegexOptions.Compiled);
         }
     }

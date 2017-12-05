@@ -13,8 +13,9 @@ namespace DakotaIntegratedSolutions
         public string GLN { get; set; }
         public DateTime Date { get; set; }
         public string VariableText { get; set; }
-        public override string ToString() { return String.Format("{0},{1}", Code, GLN); }
-        public string Value() { return String.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8}", Region, Site, Building, Floor, Room, Code, GLN, Date.ToString(), Printed.ToString()); }
+        public override string ToString() => string.Format("{0},{1}", Code, GLN);
+
+        public string Value() { return string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8}", Region, Site, Building, Floor, Room, Code, GLN, Date.ToString(), Printed.ToString()); }
         public bool Printed { get; set; }
     }
 }

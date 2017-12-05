@@ -1,8 +1,8 @@
-using System;
 using Android.App;
 using Android.OS;
 using Android.Widget;
 using AndroidZebraPrint2;
+using System;
 
 namespace DakotaIntegratedSolutions
 {
@@ -19,9 +19,6 @@ namespace DakotaIntegratedSolutions
             ((Button)FindViewById<Button>(Resource.Id.buttonOK)).Click += AboutButtonActivity_Click;
         }
 
-        private void AboutButtonActivity_Click(object sender, EventArgs e)
-        {
-            Finish();
-        }
+        void AboutButtonActivity_Click(object sender, EventArgs e) => Finish();
     }
 }

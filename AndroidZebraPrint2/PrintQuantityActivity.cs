@@ -1,8 +1,8 @@
-using System;
 using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Widget;
+using System;
 
 namespace DakotaIntegratedSolutions
 {
@@ -16,7 +16,7 @@ namespace DakotaIntegratedSolutions
         {
             base.OnCreate(bundle);
             SetContentView(AndroidZebraPrint2.Resource.Layout.PrintQuantity);
-            Button btnOK = ((Button)FindViewById<Button>(AndroidZebraPrint2.Resource.Id.buttonOK));
+            var btnOK = ((Button)FindViewById<Button>(AndroidZebraPrint2.Resource.Id.buttonOK));
             spinQty = FindViewById<Spinner>(AndroidZebraPrint2.Resource.Id.spinnerQty); ;
             spinQty.ItemSelected += SpinQty_ItemSelected;
             var adapter = ArrayAdapter.CreateFromResource(
@@ -27,15 +27,15 @@ namespace DakotaIntegratedSolutions
             btnOK.Click += BtnOK_Click;
         }
 
-        private void SpinQty_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        void SpinQty_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
-            Spinner spinner = (Spinner)sender;
+            var spinner = (Spinner)sender;
             quantity = Convert.ToInt32(spinQty.GetItemAtPosition(e.Position).ToString());
         }
 
-        private void BtnOK_Click(object sender, EventArgs e)
+        void BtnOK_Click(object sender, EventArgs e)
         {
-            Intent returnIntent = new Intent();
+            var returnIntent = new Intent();
             returnIntent.PutExtra("quantity", quantity);
             SetResult(Result.Ok, returnIntent);
             Finish();

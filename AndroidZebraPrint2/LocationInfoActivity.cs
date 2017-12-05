@@ -1,10 +1,8 @@
-using System;
 using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Widget;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 
 namespace DakotaIntegratedSolutions
 {
@@ -20,7 +18,7 @@ namespace DakotaIntegratedSolutions
             base.OnCreate(bundle);
             SetContentView(AndroidZebraPrint2.Resource.Layout.LocationInfo);
 
-            Button btnOK = ((Button)FindViewById<Button>(AndroidZebraPrint2.Resource.Id.buttonOK));
+            var btnOK = ((Button)FindViewById<Button>(AndroidZebraPrint2.Resource.Id.buttonOK));
             btnOK.Click += BtnOK_Click;
 
             locationInfo = FindViewById<TextView>(AndroidZebraPrint2.Resource.Id.locationInfoText);
@@ -28,9 +26,9 @@ namespace DakotaIntegratedSolutions
             locationInfo.Text = Intent.GetStringExtra("location");
         }
 
-        private void BtnOK_Click(object sender, EventArgs e)
+        void BtnOK_Click(object sender, EventArgs e)
         {
-            Intent returnIntent = new Intent();
+            var returnIntent = new Intent();
             SetResult(Result.Ok, returnIntent);
             Finish();
         }

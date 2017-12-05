@@ -2,21 +2,17 @@ namespace DakotaIntegratedSolutions
 {
     class ZebraPrinter : IZebraPrinter
     {
-        protected string macAddress = "";
-        protected string friendlyName = "";
+        protected string macAddress = "", friendlyName = "";
 
-        public string MACAddress {  get { return macAddress; } set { macAddress = value; } }
+        public string MACAddress { get { return macAddress; } set { macAddress = value; } }
         public string FriendlyName { get { return friendlyName; } set { friendlyName = value; } }
 
         public ZebraPrinter(string address, string name)
         {
-            this.MACAddress = address;
-            this.FriendlyName = name;
+            MACAddress = address;
+            FriendlyName = name;
         }
 
-        public override string ToString()
-        {
-            return FriendlyName;
-        }
+        public override string ToString() => FriendlyName;
     }
 }

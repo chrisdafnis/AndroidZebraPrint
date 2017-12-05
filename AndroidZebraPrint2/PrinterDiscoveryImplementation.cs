@@ -1,6 +1,6 @@
+using Android.Bluetooth;
 using LinkOS.Plugin;
 using LinkOS.Plugin.Abstractions;
-using Android.Bluetooth;
 
 namespace DakotaIntegratedSolutions
 {

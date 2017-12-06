@@ -291,7 +291,7 @@ namespace DakotaIntegratedSolutions
                             var found = false;
                             foreach (IGLNLocation location in locationList)
                             {
-                                if (location.Code.ToLower() == searchLocation.ToLower())
+                                if ((location.Code.ToLower().Contains(searchLocation.ToLower())) || (location.VariableText.ToLower().Contains(searchLocation.ToLower())))
                                 {
                                     found = true;
                                     adapter.SetSelectedIndex(i);
@@ -307,8 +307,8 @@ namespace DakotaIntegratedSolutions
                             {
                                 var dialogBuilder = new AlertDialog.Builder(this);
 
-                                dialogBuilder.SetTitle("Code Not Found");
-                                dialogBuilder.SetMessage("The room code '" + searchLocation + "' does not exist in the current database");
+                                dialogBuilder.SetTitle("Text Not Found");
+                                dialogBuilder.SetMessage("The text '" + searchLocation + "' does not exist in the current database");
                                 dialogBuilder.SetIcon(Android.Resource.Drawable.IcDialogAlert);
                                 dialogBuilder.SetPositiveButton(Android.Resource.String.Ok, delegate { });
                                 dialogBuilder.Show();
@@ -416,6 +416,7 @@ namespace DakotaIntegratedSolutions
                             Room = xElem.Element("Room").Value,
                             Code = xElem.Element("Code").Value,
                             GLN = xElem.Element("GLN").Value,
+                            VariableText = "Room Number: " + xElem.Element("Code").Value,
                             Date = Convert.ToDateTime(xElem.Element("GLNCreationDate").Value),
                             Printed = Convert.ToBoolean(xElem.Element("Printed").Value)
                         };
